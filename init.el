@@ -27,7 +27,7 @@
 (unless (file-exists-p avax-temporal-directory)
   (make-directory avax-temporal-directory))
 
-(defvar org-mode-directory (when (string-equal system-type "windows-nt")
+(defvar org-mode-directory (if (string-equal system-type "windows-nt")
                              "E:/org-mode"
                              "~/org-mode"))
 (defvar org-archive-file (concat org-mode-directory "archive.org"))
@@ -49,7 +49,9 @@
 (defvar omnisharp-exe-path "c:\\omnisharp-win-x64(1)\\OmniSharp.exe")
 
 ;; Font size
+
 (set-face-attribute 'default (selected-frame) :height 125)
+
 (setenv "USER" "c:/Users/v-milast/")
 ;; END
 
@@ -220,13 +222,12 @@ Version 2018-01-13"
       (deactivate-mark)
       (if (not xmlmodep)
           (xml-mode)))))
-
 ;; END
 ;; FUNCTION REGION
 
 ;; PACKAGES REGION
 ;; BEGIN
-;; This is only needed once, near the top of the file
+
 (eval-when-compile
   ;; Following line is not needed if use-package.el is in ~/.emacs.d
   (add-to-list 'load-path "~/.emacs.d/elpa/use-package-20171226.1104/")
@@ -271,11 +272,44 @@ Version 2018-01-13"
    ("C-c r"   . org-remember)
    ("C-c a" . org-agenda))
   :config
-  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+  (defun org-get-non-todo-headlines (org-file)
+    "Gets all non-todo headlines"
+    (with-current-buffer (find-file-noselect org-file)
+      (let* ((org-file (current-buffer))
+             (todo-keywords-exclude-match (string-join (mapcar (lambda (x)
+                                                                 (concat "-TODO=\"" x "\""))
+                                                               org-todo-keywords-1)
+                                                       "&")))
+        (org-map-entries (lambda () (nth 4 (org-heading-components)))
+                         todo-keywords-exclude-match))))
+  (defun org-capture-non-todo-headlines-function (org-file)
+    "Capturing interactive function that let's you pick non-todo headline to place your capture under"
+    (interactive)
+    (let ((picked-headline (completing-read "Pick headline: "
+                                            (org-get-no-todo-headlines org-file))))
+      (with-current-buffer (find-file-noselect org-file)
+        (goto-char 0)
+        (re-search-forward picked-headline))))
+
+  (use-package org-bullets
+    :ensure t
+    :config
+    (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
   (setq org-directory org-mode-directory)
+  (setq org-agenda-files `(,(concat org-directory "/projects.org")))
   (setq org-default-notes-file (concat org-directory "/notes.org"))
   (setq org-capture-templates
-        '(("f" "TODO entry with file capture" entry )))
+        '(("f" "TODO entry with file capture" entry )
+          ("l"
+           "TODO entry under selected headline + file"
+           entry
+           (file+function "~/org-mode/projects.org" org-capture-non-todo-headlines-function)
+           "TODO %i %a")
+           ("h"
+            "TODO entry under selected headline"
+            entry
+            (file+function "~/org-mode/projects.org" org-capture-non-todo-headlines-function)
+            "TODO %i")))
   (setq org-startup-truncated nil)
   (setq org-archive-location (concat org-archive-location "::* From %s")))
 
@@ -690,66 +724,19 @@ Version 2018-01-13"
 ;; END
 ;; SAVED MACROS REGION
 
+(put 'downcase-region 'disabled nil)
+(put 'upcase-region 'disabled nil)
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(compilation-message-face (quote default))
- '(custom-safe-themes
-   (quote
-    ("a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "6cf9c5f8782dd3dfd2beb7e2d04f21592a3b50f08bc3c1f2b4cd4a6063743ed4" "190a9882bef28d7e944aa610aa68fe1ee34ecea6127239178c7ac848754992df" "66881e95c0eda61d34aa7f08ebacf03319d37fe202d68ecf6a1dbfd49d664bc3" "e61752b5a3af12be08e99d076aedadd76052137560b7e684a8be2f8d2958edc3" "13d20048c12826c7ea636fbe513d6f24c0d43709a761052adbca052708798ce3" "26d49386a2036df7ccbe802a06a759031e4455f07bda559dcf221f53e8850e69" "c3d4af771cbe0501d5a865656802788a9a0ff9cf10a7df704ec8b8ef69017c68" "2cfc1cab46c0f5bae8017d3603ea1197be4f4fff8b9750d026d19f0b9e606fae" "38e66a2a20fa9a27af5ffc4f4dd54f69e3fef6b51be7b351e137b24958bfebd7" "ef1e992ef341e86397b39ee6b41c1368e1b33d45b0848feac6a8e8d5753daa67" "4e63466756c7dbd78b49ce86f5f0954b92bf70b30c01c494b37c586639fa3f6f" "c9ddf33b383e74dac7690255dd2c3dfa1961a8e8a1d20e401c6572febef61045" "bf798e9e8ff00d4bf2512597f36e5a135ce48e477ce88a0764cfb5d8104e8163" "8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "7153b82e50b6f7452b4519097f880d968a6eaf6f6ef38cc45a144958e553fbc6" "5e3fc08bcadce4c6785fc49be686a4a82a356db569f55d411258984e952f194a" "15348febfa2266c4def59a08ef2846f6032c0797f001d7b9148f30ace0d08bcf" "ecb9fe1d5b165a35499191a909b2b5710a52935614058b327a39bfbbb07c7dc8" "5acb6002127f5d212e2d31ba2ab5503df9cd1baa1200fbb5f57cc49f6da3056d" "8ed752276957903a270c797c4ab52931199806ccd9f0c3bb77f6f4b9e71b9272" "77c65d672b375c1e07383a9a22c9f9fc1dec34c8774fe8e5b21e76dca06d3b09" "7feeed063855b06836e0262f77f5c6d3f415159a98a9676d549bfeb6c49637c4" "77bd459212c0176bdf63c1904c4ba20fce015f730f0343776a1a14432de80990" "3c06231f8aa4ad2ebc07d70ade7a1d310cc2adab02251c77a1882787e30f8394" "4486ade2acbf630e78658cd6235a5c6801090c2694469a2a2b4b0e12227a64b9" "a25d273ab67ca3d0e8dad603d0a17a8817814a2c1879b0384a14d22d275fb19e" default)))
- '(debug-on-error nil)
- '(highlight-changes-colors (quote ("#FD5FF0" "#AE81FF")))
- '(highlight-tail-colors
-   (quote
-    (("#3C3D37" . 0)
-     ("#679A01" . 20)
-     ("#4BBEAE" . 30)
-     ("#1DB4D0" . 50)
-     ("#9A8F21" . 60)
-     ("#A75B00" . 70)
-     ("#F309DF" . 85)
-     ("#3C3D37" . 100))))
- '(org-agenda-files (quote ("e:/org-mode/projects.org")))
  '(package-selected-packages
    (quote
-    (ivy-yasnippet yasnippet-snippets rainbow-mode goto-chg mwim ahk-mode company-c-headers company-irony irony-eldoc modern-cpp-font-lock irony lsp-mode cider clojure-mode zenburn-theme yaml-mode which-key vbasense use-package undo-tree tfsmacs sql-indent solarized-theme smex searcheverything python-mode projectile-codesearch powershell paredit origami org-projectile org-bullets omnisharp neotree multiple-cursors monokai-theme moe-theme ivy-youtube ivy-hydra goto-last-change go-tag go-stacktracer go-snippets go-scratch go-projectile go-playground-cli go-playground go-imports go-impl go-gopath go-gen-test go-fill-struct go-errcheck go-dlv go-direx go-complete go-autocomplete go-add-tags github-modern-theme git-commit ghub ggtags forest-blue-theme espresso-theme elpy crux counsel-projectile counsel-gtags counsel-etags counsel-codesearch company-go company-flx bm avk-emacs-themes angular-mode ace-window)))
- '(pos-tip-background-color "#FFFACE")
- '(pos-tip-foreground-color "#272822")
- '(projectile-mode t nil (projectile))
- '(server-mode t)
- '(tfsmacs-current-workspace nil)
- '(vc-annotate-background nil)
- '(vc-annotate-color-map
-   (quote
-    ((20 . "#F92672")
-     (40 . "#CF4F1F")
-     (60 . "#C26C0F")
-     (80 . "#E6DB74")
-     (100 . "#AB8C00")
-     (120 . "#A18F00")
-     (140 . "#989200")
-     (160 . "#8E9500")
-     (180 . "#A6E22E")
-     (200 . "#729A1E")
-     (220 . "#609C3C")
-     (240 . "#4E9D5B")
-     (260 . "#3C9F79")
-     (280 . "#A1EFE4")
-     (300 . "#299BA6")
-     (320 . "#2896B5")
-     (340 . "#2790C3")
-     (360 . "#66D9EF"))))
- '(vc-annotate-very-old-color nil)
- '(weechat-color-list
-   (unspecified "#272822" "#3C3D37" "#F70057" "#F92672" "#86C30D" "#A6E22E" "#BEB244" "#E6DB74" "#40CAE4" "#66D9EF" "#FB35EA" "#FD5FF0" "#74DBCD" "#A1EFE4" "#F8F8F2" "#F8F8F0"))
- '(which-key-mode t))
+    (ivy-yasnippet yasnippet-snippets goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets omnisharp neotree multiple-cursors moe-theme ivy-youtube ivy-hydra goto-last-change go-mode flx elpy crux counsel-spotify counsel-projectile cider bm async angular-mode ace-window))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
-(put 'downcase-region 'disabled nil)
-(put 'upcase-region 'disabled nil)
