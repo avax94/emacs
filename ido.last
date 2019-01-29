@@ -1,0 +1,70 @@
+;;; -*- coding: utf-8 -*-
+
+;; ----- ido-last-directory-list -----
+(
+ ("/home/avax94/.emacs.d/elpa/archives/" . "gnu/")
+ ("/home/avax94/.emacs.d/elpa/" . "ido-completing-read+-20170820.3/")
+ ("/home/avax94/.emacs.d/" . "elpa/")
+ ("/home/avax94/workspace/MUPS/" . "D3/")
+ ("/home/avax94/workspace/" . "MUPS/")
+ ("/home/avax94/" . ".emacs.d/")
+)
+
+;; ----- ido-work-directory-list -----
+(
+ "/home/avax94/.emacs.d/elpa/ido-completing-read+-20170820.3/"
+ "/home/avax94/.emacs.d/elpa/ido-vertical-mode-20160429.1037/"
+ "/home/avax94/.emacs.d/"
+ "/home/avax94/.emacs.d/elpa/flx-ido-20151030.1112/"
+ "/home/avax94/.emacs.d/elpa/smex-20151212.1409/"
+ "/home/avax94/.emacs.d/elpa/ido-ubiquitous-20170923.842/"
+ "/home/avax94/.emacs.d/elpa/archives/gnu/"
+)
+
+;; ----- ido-work-file-list -----
+(
+ "ido-completing-read+.el"
+ "ido-vertical-mode.el"
+ "init.el"
+ "flx-ido-autoloads.el"
+ "flx-ido.el"
+ "smex.el"
+ "ido-ubiquitous-pkg.el"
+ "ido-ubiquitous.el"
+ "ido-ubiquitous-autoloads.el"
+ "archive-contents"
+)
+
+;; ----- ido-dir-file-cache -----
+(
+ ("/home/avax94/.emacs.d/" (23114 51426 944782 739000) "./" "auto-save-list/" "ido.last~" "smex-items" "../" "elpa/" "init.el" "init.el~" "ido.last")
+
+ ("/home/avax94/.emacs.d/elpa/ido-completing-read+-20170820.3/" (23111 36817 606717 416000) "./" "ido-completing-read+-autoloads.el" "../" "ido-completing-read+.el" "ido-completing-read+-pkg.el" "ido-completing-read+.elc")
+
+ ("/home/avax94/.emacs.d/elpa/archives/gnu/" (23114 39608 401395 807000) "./" "archive-contents" "../" "archive-contents.signed")
+
+ ("/home/avax94/.emacs.d/elpa/flx-ido-20151030.1112/" (23111 36819 178796 262000) "./" "flx-ido.elc" "../" "flx-ido-autoloads.el" "flx-ido-pkg.el" "flx-ido.el")
+
+ ("/home/avax94/.emacs.d/elpa/smex-20151212.1409/" (23112 749 646050 893000) "./" "smex.el" "../" "smex.elc" "smex-pkg.el" "smex-autoloads.el")
+
+ ("/home/avax94/" (23111 51852 80214 10000) "./" ".ssh/" "Public/" "PARDomaci.xls" ".gitconfig" "#tmp#" ".IntelliJIdea2016.3/" ".virtualenvs/" ".oracle_jre_usage/" "contestapplet.conf" "test/" ".emacs~" "katoolin/" "sm130075d/" "#mouse_sens.sh#" "Videos/" ".subversion/" ".m2/" ".msf4/" ".mozilla/" ".gem/" "Desktop/" ".xsession-errors" "ClionProjects/" ".rvm/" ".zlogin" ".~lock.PARDomaci.xls#" ".zshrc" "../" "ipfs/" "VLCsub/" ".macromedia/" ".wget-hsts" "Templates/" ".scala_history" ".nano/" ".dmrc" ".emacs" ".cache/" ".#a" ".compiz/" ".bash_logout" ".Xauthority" ".config/" "MIMTF/" ".ICEauthority" "cuda/" ".ipfs/" "commit" "workspace/" "Music/" ".bashrc" "first-01.csv" ".altera.quartus/" ".mkshrc" ".adobe/" "mouse_sens.sh~" ".selected_editor" ".bash_history" "first-01.kismet.csv" ".sudo_as_admin_successful" "#a#" ".bashrc~" ".local/" "altera/" ".ZAP/" ".gnupg/" ".emacs.d/" "contestapplet.conf.bak" "result3.txt" ".xsession-errors.old" "tmp2" "#heated_place.cu#" ".profile" ".CLion2016.3/" ".nv/" ".java/" ".webgoat/" "mouse_sens.sh" "first-01.kismet.netxml" "Pictures/" "Downloads/" ".dbus/" ".#asd" ".bundle/" "Documents/" "examples.desktop" ".bundler/" "#asd#" ".#tmp" "first-01.cap" ".gconf/" ".bash_profile")
+
+ ("/home/avax94/.emacs.d/elpa/ido-vertical-mode-20160429.1037/" (23111 36829 119295 925000) "./" "ido-vertical-mode-pkg.el" "ido-vertical-mode-autoloads.el" "../" "ido-vertical-mode.el" "ido-vertical-mode.elc")
+
+ ("/home/avax94/.emacs.d/elpa/ido-ubiquitous-20170923.842/" (23111 36818 102742 291000) "./" "ido-ubiquitous.elc" "ido-ubiquitous.el" "ido-ubiquitous-pkg.el" "../" "ido-ubiquitous-autoloads.el")
+
+ ("/home/avax94/.emacs.d/elpa/archives/" (22840 26800 654637 643000) "./" "../" "melpa/" "gnu/")
+
+ ("/home/avax94/.emacs.d/elpa/" (23111 51852 424224 959000) "./" "yasnippet-0.12.2.signed" "tao-theme-20171221.1001/" "paradox-20161117.502/" "popup-20160709.729/" "yasnippet-0.12.2/" "ido-ubiquitous-20170923.842/" "s-20171102.227/" "pkg-info-20150517.443/" "paredit-20171126.1805/" "cuda-mode-20151213.1921/" "../" "spinner-1.7.3.signed" "ido-vertical-mode-20160429.1037/" "helm-20171223.2257/" "auto-complete-20170124.1845/" "flx-20151030.1112/" "archives/" "dash-20171028.854/" "use-package-20171226.1104/" "spinner-1.7.3/" "helm-gtags-20170115.2129/" "flycheck-20171214.1215/" "ggtags-0.8.12/" "epl-20150517.433/" "which-key-3.0.2.signed" "rainbow-delimiters-20170929.432/" "bind-key-20171210.2125/" "helm-ag-20170209.745/" "async-20171015.2239/" "smex-20151212.1409/" "which-key-3.0.2/" "ido-completing-read+-20170820.3/" "gnupg/" "hydra-20171120.1042/" "flx-ido-20151030.1112/" "helm-core-20171223.1/" "google-this-20170810.515/" "memoize-20170720.1802/" "ggtags-0.8.12.signed")
+
+ ("/home/avax94/workspace/MUPS/D3/" (22845 13803 110055 85000) "./" "tpacf/" "sm130075d/" "HPLATE/" "MPS_DZ4_CUDA.tar.bz2" "heated_plate/" "../" "QUAD/" ".emacs" "quad2/" "predaja/" "tpacf_s/")
+
+ ("/home/avax94/workspace/MUPS/" (22834 51578 755722 700000) "./" "ispit/" "../" "src/" "D2/" "D1/" "MUPS_primeri_2015.zip" "D3/")
+
+ ("/home/avax94/workspace/" (22813 39479 52713 416000) "./" "Multiplexer/" "ram/" "pp1Backup/" "levi9/" "test.cpp" "Muups/" "vhdl/" "../" "projSubmisson/" "pp1/" "pokazniVLSI/" "test.cpp~" "MUPS/" "vragolanka~" "IdeaProjects/" "vragolanka" "Jovan/" "thrifty.yy" "projekatPredaja.zip" "tmp/" ".gitignore" "projekatPredaja/" "#avax.1994#" "HackingProjects/" "Domaci1/")
+
+ ("/home/" (22608 4950 328137 841000) "./" "lost+found/" "../" "avax94/" "Applications/")
+)
+
+;; ----- ido-unc-hosts-cache -----
+t
