@@ -280,16 +280,17 @@ Version 2018-01-13"
                                                                  (concat "-TODO=\"" x "\""))
                                                                org-todo-keywords-1)
                                                        "&")))
-        (org-map-entries (lambda () (nth 4 (org-heading-components)))
+        (org-map-entries (lambda () (cons (nth 4 (org-heading-components)) (point)))
                          todo-keywords-exclude-match))))
   (defun org-capture-non-todo-headlines-function (org-file)
     "Capturing interactive function that let's you pick non-todo headline to place your capture under"
     (interactive)
-    (let ((picked-headline (completing-read "Pick headline: "
-                                            (org-get-no-todo-headlines org-file))))
+    (let* ((headlines (org-get-non-todo-headlines org-file))
+           (picked-headline (completing-read "Pick headline: "
+                                            (mapcar (lambda (x) (car x)) headlines))))
       (with-current-buffer (find-file-noselect org-file)
-        (goto-char 0)
-        (re-search-forward picked-headline))))
+        (goto-char (cdr (assoc picked-headline headlines)))
+        (end-of-line))))
 
   (use-package org-bullets
     :ensure t
@@ -297,19 +298,20 @@ Version 2018-01-13"
     (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
   (setq org-directory org-mode-directory)
   (setq org-agenda-files `(,(concat org-directory "/projects.org")))
+  (setq org-main-agenda-file (concat org-directory "/projects.org"))
   (setq org-default-notes-file (concat org-directory "/notes.org"))
   (setq org-capture-templates
         '(("f" "TODO entry with file capture" entry )
           ("l"
            "TODO entry under selected headline + file"
            entry
-           (file+function "~/org-mode/projects.org" org-capture-non-todo-headlines-function)
-           "TODO %i %a")
+           (file+function  org-main-agenda-file (lambda () (org-capture-non-todo-headlines-function org-main-agenda-file)))
+           "* TODO %i \n%a")
            ("h"
             "TODO entry under selected headline"
             entry
-            (file+function "~/org-mode/projects.org" org-capture-non-todo-headlines-function)
-            "TODO %i")))
+            (file+function org-main-agenda-file (lambda () (org-capture-non-todo-headlines-function org-main-agenda-file)))
+            "* TODO %i")))
   (setq org-startup-truncated nil)
   (setq org-archive-location (concat org-archive-location "::* From %s")))
 
