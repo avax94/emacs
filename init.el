@@ -592,7 +592,7 @@ Version 2018-01-13"
   (defhydra mc-hydra()
     "Multiple cursors hydra"
     ("n" mc/mark-next-lines "Mark next line")
-    ("N" mc/mark-next-like-this "Mark next like this")
+    ("n" mc/mark-next-like-this "Mark next like this")
     ("p" mc/mark-previous-lines "Mark previous line")
     ("P" mc/mark-previous-like-this "Mark previous like this")
     ("q" nil "quit" :color blue))
@@ -696,6 +696,7 @@ Version 2018-01-13"
 
 (use-package god-mode
   :ensure t
+  :disabled ;; I don't feel comfortable using this just yet
   :bind (("<escape>" . god-local-mode)
          :map god-local-mode-map
               ("z" . repeat)
@@ -741,6 +742,7 @@ Version 2018-01-13"
   (load-theme 'github-modern t))
 
 (use-package wttrin
+  :ensure t
   :config
   (setq wttrin-default-cities '("Belgrade"))
   (setq wttrin-default-accept-language '("Accept-Language" . "en-GB")))
