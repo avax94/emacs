@@ -5,14 +5,13 @@
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.
 (package-initialize)
-(require 'dash)
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
 ;; Added by Package.el.  This must come before configurations of
 ;; installed packages.  Don't delete this line.  If you don't want it,
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.
-(package-initialize)
+(require 'dash)
 
 ;; MODIFY -REGION
 ;; BEGIN
@@ -26,6 +25,8 @@
 (defvar avax-temporal-directory (concat user-emacs-directory "tmp/"))
 (unless (file-exists-p avax-temporal-directory)
   (make-directory avax-temporal-directory))
+
+(defvar org-mode-scratch-file "E:/org-mode/scratch.org")
 
 (defvar org-mode-directory (if (string-equal system-type "windows-nt")
                              "E:/org-mode"
@@ -61,11 +62,17 @@
 ;; reduce the frequency of garbage collection by making it happen on
 ;; each 50MB of allocated data (the default is on every 0.76MB)
 (setq gc-cons-threshold 50000000)
+
+(setq jit-lock-stealth-time 0.2)
+(setq jit-lock-chunk-size 500)
+(setq jit-lock-defer-time 0.2)
+(setq ido-auto-merge-work-directories-length -1)
+
 ;; disable the annoying bell ring
 (setq ring-bell-function 'ignore)
 ;; this variable changes syntax colorization and improves perf on large files when
 ;; it is smaller
-(setq font-lock-maximum-decoration 2)
+(setq font-lock-maximum-decoration 3)
 (setq tab-width 4)
 ;; nothing but buffer
 (menu-bar-mode 0)
@@ -109,6 +116,7 @@
 
 ;; FUNCTION REGION
 ;; BEGIN
+
 (defun run-powershell ()
   "Run powershell"
   (interactive)
@@ -130,7 +138,6 @@
     (when filename
       (kill-new filename)
       (message "Copied buffer file name '%s' to the clipboard." filename))))
-
 
 (defun replace-last-sexp ()
   (interactive)
@@ -236,6 +243,10 @@ Version 2018-01-13"
 (use-package flx
   :ensure t)
 
+(use-package jump-char
+  :ensure t
+  :bind (("C-q" . jump-char-forward)))
+
 (use-package crux
   :ensure t
   :bind (("C-; o" . crux-open-with)
@@ -265,6 +276,7 @@ Version 2018-01-13"
   (("C-c c" . org-capture)
    ("C-c o a" . org-agenda-list)
    ("C-c o t" . org-todo-list)
+   ("C-c o f" . org-scratch-search)
    ("C-c o p" . org-insert-drawer)
    ("C-c o d" . org-date)
    ("C-c o j" . org-journal-entry)
@@ -272,6 +284,11 @@ Version 2018-01-13"
    ("C-c r"   . org-remember)
    ("C-c a" . org-agenda))
   :config
+  (defun org-scratch-search ()
+    (interactive)
+    (let* ((org-agenda-files (list org-mode-scratch-file)))
+      (org-tags-view)))
+  (setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
   (defun org-get-non-todo-headlines (org-file)
     "Gets all non-todo headlines"
     (with-current-buffer (find-file-noselect org-file)
@@ -296,35 +313,57 @@ Version 2018-01-13"
     :ensure t
     :config
     (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  (use-package org-protocol)
   (setq org-directory org-mode-directory)
   (setq org-agenda-files `(,(concat org-directory "/projects.org")))
   (setq org-main-agenda-file (concat org-directory "/projects.org"))
+  (setq org-refile-targets '((org-agenda-files :tag . "TASKGROUP")))
+  (setq org-agenda-hide-tags-regexp "TASKGROUP")
   (setq org-default-notes-file (concat org-directory "/notes.org"))
   (setq org-capture-templates
-        '(("f" "TODO entry with file capture" entry )
+        '(("t"
+           "TODO entry without file capture"
+           entry
+           (file+headline org-main-agenda-file "RandomTasks")
+           "* TODO %?%i")
+          ("f"
+           "TODO entry with file capture"
+           entry
+           (file+headline org-main-agenda-file "RandomTasks")
+           "* TODO %?%i \n%a")
           ("l"
            "TODO entry under selected headline + file"
            entry
            (file+function  org-main-agenda-file (lambda () (org-capture-non-todo-headlines-function org-main-agenda-file)))
            "* TODO %i \n%a")
-           ("h"
-            "TODO entry under selected headline"
-            entry
-            (file+function org-main-agenda-file (lambda () (org-capture-non-todo-headlines-function org-main-agenda-file)))
-            "* TODO %i")))
+          ("h"
+           "TODO entry under selected headline"
+           entry
+           (file+function org-main-agenda-file (lambda () (org-capture-non-todo-headlines-function org-main-agenda-file)))
+           "* TODO %i")
+          ("n"
+           "Scratchpad"
+           entry
+           (file+datetree org-mode-scratch-file)
+           "* %^{Description} %^g\n%T\n%i%?")
+          ("F"
+           "Scratchpad with file"
+           entry
+           (file+datetree org-mode-scratch-file)
+           "* %^{Description} %^g\n%T\n%a\n%i%?")))
+  (advice-add 'org-agenda :around #'org-agenda-advice)
   (setq org-startup-truncated nil)
-  (setq org-archive-location (concat org-archive-location "::* From %s")))
-
-(use-package org-projectile
-  :ensure t
-  :bind (("C-c C-n p" . org-projectile-project-todo-completing-read)
-         ("C-c c" . org-capture))
-  :config
-  (progn
-    (setq org-projectile-projects-file
-          (concat org-directory "/projects.org"))
-    (push (org-projectile-project-todo-entry) org-capture-templates))
-  :ensure t)
+  (setq org-archive-location (concat org-archive-location "::* From %s"))
+  (use-package org-projectile
+    :ensure t
+    :bind (("C-c C-n p" . org-projectile-project-todo-completing-read)
+           ("C-c c" . org-capture))
+    :config
+    (progn
+      (setq org-projectile-projects-file
+            (concat org-directory "/projects.org"))
+      (push (org-projectile-project-todo-entry) org-capture-templates))
+    :ensure t))
 
 (use-package saveplace
   :ensure t
@@ -455,6 +494,7 @@ Version 2018-01-13"
 
 (use-package neotree
   :ensure t
+  :disabled
   :init
   (setq neo-smart-open t
         neo-show-hidden-files t
@@ -465,10 +505,18 @@ Version 2018-01-13"
   :bind
   ("C-c C-q" . neotree-toggle)
   ("C-c r")
-  ("C-q" . neotree-show)
   (:map
    neotree-mode-map
    ("C-c C-w" . neotree-copy-filepath-to-yank-ring)))
+
+(use-package treemacs
+  :ensure t
+  :defer t
+  :config
+  (use-package treemacs-projectile
+    :ensure t
+    :defer t
+    :config))
 
 (use-package company
   :ensure t
@@ -638,6 +686,28 @@ Version 2018-01-13"
   :config (use-package yasnippet-snippets
             :ensure t))
 
+(use-package nswbuff                    ; Quick switching between buffers
+  :ensure t
+  :bind* (("<C-tab>"           . nswbuff-switch-to-next-buffer)
+          ("<C-S-iso-lefttab>" . nswbuff-switch-to-previous-buffer))
+  :config (setq nswbuff-buffer-list-function #'nswbuff-projectile-buffer-list
+                nswbuff-display-intermediate-buffers t))
+
+
+(use-package god-mode
+  :ensure t
+  :bind (("<escape>" . god-local-mode)
+         :map god-local-mode-map
+              ("z" . repeat)
+              ("i" . god-local-mode)
+              ("C-x C-1" . delete-other-windows)
+              ("C-x C-2" . split-window-below)
+              ("C-x C-3" . split-window-right)
+              ("C-x C-0" . delete-window)
+              ("C-x C-o" . other-window))
+  :config
+  (add-to-list 'god-exempt-major-modes 'dired-mode))
+
 ;; Preview snippets with Ivy
 (use-package ivy-yasnippet
   :ensure t
@@ -657,6 +727,23 @@ Version 2018-01-13"
   :ensure t
   :config
   (load-theme 'moe-light t))
+
+(use-package monokai-theme
+  :ensure t
+  :disabled
+  :config
+  (load-theme 'monokai t))
+
+(use-package github-modern-theme
+  :ensure t
+  :disabled
+  :config
+  (load-theme 'github-modern t))
+
+(use-package wttrin
+  :config
+  (setq wttrin-default-cities '("Belgrade"))
+  (setq wttrin-default-accept-language '("Accept-Language" . "en-GB")))
 
 (use-package which-function-mode
   :ensure nil
@@ -733,9 +820,13 @@ Version 2018-01-13"
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(cua-mode nil nil (cua-base))
+ '(custom-safe-themes
+   (quote
+    ("585942bb24cab2d4b2f74977ac3ba6ddbd888e3776b9d2f993c5704aa8bb4739" "b583823b9ee1573074e7cbfd63623fe844030d911e9279a7c8a5d16de7df0ed0" "5acb6002127f5d212e2d31ba2ab5503df9cd1baa1200fbb5f57cc49f6da3056d" "1436d643b98844555d56c59c74004eb158dc85fc55d2e7205f8d9b8c860e177f" "13d20048c12826c7ea636fbe513d6f24c0d43709a761052adbca052708798ce3" "2cfc1cab46c0f5bae8017d3603ea1197be4f4fff8b9750d026d19f0b9e606fae" "c3d4af771cbe0501d5a865656802788a9a0ff9cf10a7df704ec8b8ef69017c68" default)))
  '(package-selected-packages
    (quote
-    (ivy-yasnippet yasnippet-snippets goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets omnisharp neotree multiple-cursors moe-theme ivy-youtube ivy-hydra goto-last-change go-mode flx elpy crux counsel-spotify counsel-projectile cider bm async angular-mode ace-window))))
+    (doom-themes gruvbox-theme jump-char sx smartparens back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile treemacs fsharp-mode monokai ivy-yasnippet yasnippet-snippets goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets omnisharp neotree multiple-cursors moe-theme ivy-youtube ivy-hydra goto-last-change go-mode flx elpy crux counsel-spotify counsel-projectile cider bm async angular-mode ace-window))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
