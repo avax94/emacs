@@ -696,7 +696,6 @@ Version 2018-01-13"
 
 (use-package god-mode
   :ensure t
-  :disabled ;; I don't feel comfortable using this just yet
   :bind (("<escape>" . god-local-mode)
          :map god-local-mode-map
               ("z" . repeat)
