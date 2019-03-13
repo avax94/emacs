@@ -592,7 +592,7 @@ Version 2018-01-13"
   (defhydra mc-hydra()
     "Multiple cursors hydra"
     ("n" mc/mark-next-lines "Mark next line")
-    ("n" mc/mark-next-like-this "Mark next like this")
+    ("N" mc/mark-next-like-this "Mark next like this")
     ("p" mc/mark-previous-lines "Mark previous line")
     ("P" mc/mark-previous-like-this "Mark previous like this")
     ("q" nil "quit" :color blue))
