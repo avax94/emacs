@@ -39,7 +39,9 @@
            "C:/cygwin64/usr/local/bin" ";"
            "C:/cygwin64/usr/bin" ";"
            "C:/cygwin64/bin" ";"
+           "D:/usr/bin" ";"
            "D:/ag/" ";"
+           "C:/Program Files/Git/in" ";"
            "d:/emacs26.1686/bin" ";"
            "C:/Users/v-milast/go/bin" ";"
            "C:/Program Files/Java/jdk1.8.0_172/bin/" ";"
@@ -108,6 +110,7 @@
 (show-paren-mode t)
 
 (global-set-key (kbd "C-'") #'save-shortcut-to-current-buffer)
+(global-set-key (kbd "C-x C-O") 'other-frame)
 (global-set-key (kbd "C-c C-o") #'xah-show-in-desktop)
 (global-set-key (kbd "C-c C-j") #'replace-last-sexp)
 
@@ -260,16 +263,6 @@ Version 2018-01-13"
   (setq exec-path (append (list python-exec-path) exec-path))
   (elpy-enable))
 
-(use-package go-mode
-  :ensure t
-  :init
-  (defun my-go-mode-hook ()
-    (add-hook 'before-save-hook 'gofmt-before-save) ; gofmt before every save
-    (local-set-key (kbd "M-.") 'godef-jump)
-    (local-set-key (kbd "M-*") 'pop-tag-mark))
-  :config
-  (add-hook 'go-mode-hook 'my-go-mode-hook))
-
 (use-package org
   :ensure t
   :bind
@@ -353,17 +346,7 @@ Version 2018-01-13"
            "* %^{Description} %^g\n%T\n%a\n%i%?")))
   (advice-add 'org-agenda :around #'org-agenda-advice)
   (setq org-startup-truncated nil)
-  (setq org-archive-location (concat org-archive-location "::* From %s"))
-  (use-package org-projectile
-    :ensure t
-    :bind (("C-c C-n p" . org-projectile-project-todo-completing-read)
-           ("C-c c" . org-capture))
-    :config
-    (progn
-      (setq org-projectile-projects-file
-            (concat org-directory "/projects.org"))
-      (push (org-projectile-project-todo-entry) org-capture-templates))
-    :ensure t))
+  (setq org-archive-location (concat org-archive-location "::* From %s")))
 
 (use-package saveplace
   :ensure t
@@ -409,15 +392,6 @@ Version 2018-01-13"
   (setq whitespace-style '(whitespace tab-mark space-mark empty trailing)))
 ;; limit line length
 
-(use-package angular-mode
-  :ensure t
-  :config
-  (setq auto-mode-alist (append '(("\\.ts$" . angular-mode))
-                                auto-mode-alist)))
-
-(use-package projectile-codesearch
-    :ensure t)
-
 (use-package codesearch
   :ensure t
   :config
@@ -449,7 +423,6 @@ Version 2018-01-13"
 
 ;;Omnisharp is slowing me down - stop it
 (use-package omnisharp
-  :disabled
   :init
   (eval-after-load
       'company
@@ -491,23 +464,6 @@ Version 2018-01-13"
   :config
   (setq auto-mode-alist (append '(("\\.cs$" . csharp-mode))
                                 auto-mode-alist)))
-
-(use-package neotree
-  :ensure t
-  :disabled
-  :init
-  (setq neo-smart-open t
-        neo-show-hidden-files t
-        neo-autorefresh t)
-  :config
-  (bind-keys*
-   ("C-c n" . copy-file-name-to-clipboard))
-  :bind
-  ("C-c C-q" . neotree-toggle)
-  ("C-c r")
-  (:map
-   neotree-mode-map
-   ("C-c C-w" . neotree-copy-filepath-to-yank-ring)))
 
 (use-package treemacs
   :ensure t
@@ -601,8 +557,10 @@ Version 2018-01-13"
   ("C-c C-e" . mc/edit-lines)
   ("C-c C-l" . mc/mark-all-like-this))
 
+;; Not using this
 (use-package ace-window
   :ensure t
+  :disabled
   :requires hydra
   :init
   (defhydra hydra-window ()
@@ -621,9 +579,7 @@ Version 2018-01-13"
   ("C-<tab>" . other-window)
   ("C-M-o" . hydra-window/body))
 
-(use-package goto-last-change
-  :ensure t)
-
+;; Not using anymore
 (use-package smex
   :ensure t)
 
@@ -632,9 +588,11 @@ Version 2018-01-13"
   :ensure t)
 
 (use-package clojure-mode
+  :disabled
   :ensure t)
 
 (use-package cider
+  :disabled
   :ensure t)
 
 (use-package searcheverything
@@ -693,7 +651,6 @@ Version 2018-01-13"
   :config (setq nswbuff-buffer-list-function #'nswbuff-projectile-buffer-list
                 nswbuff-display-intermediate-buffers t))
 
-
 (use-package god-mode
   :ensure t
   :bind (("<escape>" . god-local-mode)
@@ -749,6 +706,21 @@ Version 2018-01-13"
 (use-package which-function-mode
   :ensure nil
   :hook (prog-mode . which-function-mode))
+
+(use-package expand-region
+  :ensure t
+  :bind (("M-SPC" . er/expand-region)))
+
+(use-package change-inner
+  :ensure t
+  :bind (("C-c C-i" . change-inner))
+  :after expand-region)
+
+(use-package keyfreq
+  :ensure t
+  :config
+  (keyfreq-mode 1)
+  (keyfreq-autosave-mode 1))
 
 ;; END
 ;; PACKAGES REGION
@@ -827,7 +799,7 @@ Version 2018-01-13"
     ("585942bb24cab2d4b2f74977ac3ba6ddbd888e3776b9d2f993c5704aa8bb4739" "b583823b9ee1573074e7cbfd63623fe844030d911e9279a7c8a5d16de7df0ed0" "5acb6002127f5d212e2d31ba2ab5503df9cd1baa1200fbb5f57cc49f6da3056d" "1436d643b98844555d56c59c74004eb158dc85fc55d2e7205f8d9b8c860e177f" "13d20048c12826c7ea636fbe513d6f24c0d43709a761052adbca052708798ce3" "2cfc1cab46c0f5bae8017d3603ea1197be4f4fff8b9750d026d19f0b9e606fae" "c3d4af771cbe0501d5a865656802788a9a0ff9cf10a7df704ec8b8ef69017c68" default)))
  '(package-selected-packages
    (quote
-    (doom-themes gruvbox-theme jump-char sx smartparens back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile treemacs fsharp-mode monokai ivy-yasnippet yasnippet-snippets goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets omnisharp neotree multiple-cursors moe-theme ivy-youtube ivy-hydra goto-last-change go-mode flx elpy crux counsel-spotify counsel-projectile cider bm async angular-mode ace-window))))
+    (keyfreq shx change-inner pt doom-themes gruvbox-theme jump-char sx smartparens back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile treemacs fsharp-mode monokai ivy-yasnippet yasnippet-snippets goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets omnisharp neotree multiple-cursors moe-theme ivy-youtube ivy-hydra goto-last-change go-mode flx elpy crux counsel-spotify counsel-projectile cider bm async angular-mode ace-window))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
