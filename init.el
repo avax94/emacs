@@ -31,6 +31,7 @@
 (defvar org-mode-directory (if (string-equal system-type "windows-nt")
                              "E:/org-mode"
                              "~/org-mode"))
+
 (defvar org-archive-file (concat org-mode-directory "archive.org"))
 
 (when (string-equal system-type "windows-nt")
@@ -579,7 +580,6 @@ Version 2018-01-13"
   ("C-<tab>" . other-window)
   ("C-M-o" . hydra-window/body))
 
-;; Not using anymore
 (use-package smex
   :ensure t)
 
@@ -644,7 +644,7 @@ Version 2018-01-13"
   :config (use-package yasnippet-snippets
             :ensure t))
 
-(use-package nswbuff                    ; Quick switching between buffers
+(use-package nswbuff                   ; Quick switching between buffers
   :ensure t
   :bind* (("<C-tab>"           . nswbuff-switch-to-next-buffer)
           ("<C-S-iso-lefttab>" . nswbuff-switch-to-previous-buffer))
@@ -653,6 +653,14 @@ Version 2018-01-13"
 
 (use-package god-mode
   :ensure t
+  :init
+  (defun my-update-cursor ()
+    (setq cursor-type (if (or god-local-mode buffer-read-only)
+                          'box
+                        'bar)))
+  :config
+  (add-hook 'god-mode-enabled-hook 'my-update-cursor)
+  (add-hook 'god-mode-disabled-hook 'my-update-cursor)
   :bind (("<escape>" . god-local-mode)
          :map god-local-mode-map
               ("z" . repeat)
@@ -799,7 +807,7 @@ Version 2018-01-13"
     ("585942bb24cab2d4b2f74977ac3ba6ddbd888e3776b9d2f993c5704aa8bb4739" "b583823b9ee1573074e7cbfd63623fe844030d911e9279a7c8a5d16de7df0ed0" "5acb6002127f5d212e2d31ba2ab5503df9cd1baa1200fbb5f57cc49f6da3056d" "1436d643b98844555d56c59c74004eb158dc85fc55d2e7205f8d9b8c860e177f" "13d20048c12826c7ea636fbe513d6f24c0d43709a761052adbca052708798ce3" "2cfc1cab46c0f5bae8017d3603ea1197be4f4fff8b9750d026d19f0b9e606fae" "c3d4af771cbe0501d5a865656802788a9a0ff9cf10a7df704ec8b8ef69017c68" default)))
  '(package-selected-packages
    (quote
-    (keyfreq shx change-inner pt doom-themes gruvbox-theme jump-char sx smartparens back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile treemacs fsharp-mode monokai ivy-yasnippet yasnippet-snippets goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets omnisharp neotree multiple-cursors moe-theme ivy-youtube ivy-hydra goto-last-change go-mode flx elpy crux counsel-spotify counsel-projectile cider bm async angular-mode ace-window))))
+    (nswbuff-mode expand-region nswbuf keyfreq shx change-inner pt doom-themes gruvbox-theme jump-char sx smartparens back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile treemacs fsharp-mode monokai ivy-yasnippet yasnippet-snippets goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets omnisharp neotree multiple-cursors moe-theme ivy-youtube ivy-hydra goto-last-change go-mode flx elpy crux counsel-spotify counsel-projectile cider bm async angular-mode ace-window))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
