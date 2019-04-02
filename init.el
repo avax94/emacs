@@ -661,17 +661,23 @@ Version 2018-01-13"
   :config
   (add-hook 'god-mode-enabled-hook 'my-update-cursor)
   (add-hook 'god-mode-disabled-hook 'my-update-cursor)
+  (add-to-list 'god-exempt-major-modes 'dired-mode)
+  (defun god-mode-switch-buffer ()
+    (interactive)
+    (ivy-switch-buffer)
+    (god-local-mode))
   :bind (("<escape>" . god-local-mode)
+         ("C-'" . god-local-mode)
          :map god-local-mode-map
               ("z" . repeat)
               ("i" . god-local-mode)
+              ("C-c C-i" . change-inner)
               ("C-x C-1" . delete-other-windows)
               ("C-x C-2" . split-window-below)
               ("C-x C-3" . split-window-right)
               ("C-x C-0" . delete-window)
-              ("C-x C-o" . other-window))
-  :config
-  (add-to-list 'god-exempt-major-modes 'dired-mode))
+              ("C-x C-o" . other-window)
+              ("C-x C-b" . god-mode-switch-buffer)))
 
 ;; Preview snippets with Ivy
 (use-package ivy-yasnippet
