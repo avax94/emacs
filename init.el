@@ -32,7 +32,7 @@
                              "E:/org-mode"
                              "~/org-mode"))
 
-(defvar org-archive-file (concat org-mode-directory "archive.org"))
+(defvar org-archive-file (concat org-mode-directory "/archive.org"))
 
 (when (string-equal system-type "windows-nt")
   (setenv "PATH"
@@ -347,7 +347,7 @@ Version 2018-01-13"
            "* %^{Description} %^g\n%T\n%a\n%i%?")))
   (advice-add 'org-agenda :around #'org-agenda-advice)
   (setq org-startup-truncated nil)
-  (setq org-archive-location (concat org-archive-location "::* From %s")))
+  (setq org-archive-location (concat org-archive-file "::* From %s")))
 
 (use-package saveplace
   :ensure t
@@ -400,7 +400,8 @@ Version 2018-01-13"
   (setq codesearch-output-buffer "*codesearch*")
   (setq codesearch-csearch (concat (getenv "USER") "/go/bin/csearch.exe"))
   (setq codesearch-cindex (concat (getenv "USER") "/go/bin/cindex.exe"))
-  (setq codesearch-csearchindex "CSearchTags"))
+  (setq codesearch-csearchindex "CSearchTags")
+  :bind (("M-[" . listing-codesearch-search)))
 
 (use-package counsel-projectile
   :ensure t
@@ -428,6 +429,7 @@ Version 2018-01-13"
   (eval-after-load
       'company
     '(add-to-list 'company-backends 'company-omnisharp))
+  :diminish omnisharp-mode
   :config
   (defun my-csharp-mode-setup ()
     (omnisharp-mode)
@@ -439,10 +441,13 @@ Version 2018-01-13"
     (setq c-basic-offset 4)
     (setq truncate-lines t)
     (setq tab-width 4)
-    (setq company-idle-delay 0)
+    (setq company-idle-delay 0.5)
     (setq evil-shift-width 4)
+    (setq flycheck-idle-change-delay 1.0)
     (local-set-key (kbd "C-c r r") 'omnisharp-run-code-action-refactoring)
-    (local-set-key (kbd "C-c C-c") 'recompile))
+    (local-set-key (kbd "C-c C-c") 'recompile)
+    (local-set-key (kbd "M-.") 'omnisharp-go-to-definition)
+    (local-set-key (kbd "M-;") 'omnisharp-find-usages))
   (add-hook 'csharp-mode-hook #'my-csharp-mode-setup t)
   (setq omnisharp-server-executable-path omnisharp-exe-path))
 
@@ -462,6 +467,7 @@ Version 2018-01-13"
   ;; only use this in windows
   :if (string-equal system-type "windows-nt")
   :ensure t
+  :diminish csharp-mode
   :config
   (setq auto-mode-alist (append '(("\\.cs$" . csharp-mode))
                                 auto-mode-alist)))
@@ -612,6 +618,9 @@ Version 2018-01-13"
   :bind (([remap move-beginning-of-line] . mwim-beginning-of-code-or-line)
          ([remap move-end-of-line] . mwim-end-of-code-or-line)))
 
+(use-package diminish
+  :ensure t)
+
 (use-package goto-chg
   :ensure t
   :bind ("C-," . goto-last-change))
@@ -619,7 +628,6 @@ Version 2018-01-13"
 ;; Handling capitalized subwords in a nomenclature
 (use-package subword
   :ensure nil
-  :diminish
   :hook ((prog-mode . subword-mode)
          (minibuffer-setup . subword-mode)))
 
@@ -662,10 +670,12 @@ Version 2018-01-13"
   (add-hook 'god-mode-enabled-hook 'my-update-cursor)
   (add-hook 'god-mode-disabled-hook 'my-update-cursor)
   (add-to-list 'god-exempt-major-modes 'dired-mode)
+  (add-to-list 'god-exempt-major-modes 'org-agenda-mode)
   (defun god-mode-switch-buffer ()
     (interactive)
     (ivy-switch-buffer)
     (god-local-mode))
+  (god-mode-all)
   :bind (("<escape>" . god-local-mode)
          ("C-'" . god-local-mode)
          :map god-local-mode-map
@@ -735,6 +745,11 @@ Version 2018-01-13"
   :config
   (keyfreq-mode 1)
   (keyfreq-autosave-mode 1))
+
+(use-package smooth-scrolling
+  :ensure t
+  :config
+  (smooth-scrolling-mode 1))
 
 ;; END
 ;; PACKAGES REGION
@@ -813,7 +828,9 @@ Version 2018-01-13"
     ("585942bb24cab2d4b2f74977ac3ba6ddbd888e3776b9d2f993c5704aa8bb4739" "b583823b9ee1573074e7cbfd63623fe844030d911e9279a7c8a5d16de7df0ed0" "5acb6002127f5d212e2d31ba2ab5503df9cd1baa1200fbb5f57cc49f6da3056d" "1436d643b98844555d56c59c74004eb158dc85fc55d2e7205f8d9b8c860e177f" "13d20048c12826c7ea636fbe513d6f24c0d43709a761052adbca052708798ce3" "2cfc1cab46c0f5bae8017d3603ea1197be4f4fff8b9750d026d19f0b9e606fae" "c3d4af771cbe0501d5a865656802788a9a0ff9cf10a7df704ec8b8ef69017c68" default)))
  '(package-selected-packages
    (quote
-    (nswbuff-mode expand-region nswbuf keyfreq shx change-inner pt doom-themes gruvbox-theme jump-char sx smartparens back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile treemacs fsharp-mode monokai ivy-yasnippet yasnippet-snippets goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets omnisharp neotree multiple-cursors moe-theme ivy-youtube ivy-hydra goto-last-change go-mode flx elpy crux counsel-spotify counsel-projectile cider bm async angular-mode ace-window))))
+    (diminish smooth-scrolling smooth-scroll eopengrok nswbuff-mode expand-region nswbuf keyfreq shx change-inner pt doom-themes gruvbox-theme jump-char sx smartparens back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile treemacs fsharp-mode monokai ivy-yasnippet yasnippet-snippets goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets omnisharp neotree multiple-cursors moe-theme ivy-youtube ivy-hydra goto-last-change go-mode flx elpy crux counsel-spotify counsel-projectile cider bm async angular-mode ace-window)))
+ '(smooth-scroll-mode nil)
+ '(smooth-scrolling-mode t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
