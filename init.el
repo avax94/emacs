@@ -18,6 +18,8 @@
 
 (defvar ggtags-exec-path "C:/Ggtags/bin")
 
+(defvar tf-exe "C:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/Common7/IDE/CommonExtensions/Microsoft/TeamFoundation/Team Explorer/TF.exe")
+
 (defvar python-exec-path "C:/Users/v-milast/AppData/Local/Programs/Python/Python37/")
 
 (defvar everything-cli-install-dir "E:/ES-1.1.0.10/")
@@ -50,7 +52,7 @@
            (getenv "PATH")))
   (setq exec-path (append (list "C:/cygwin64/bin" "D:/ag/") exec-path)))
 
-(defvar omnisharp-exe-path "c:\\omnisharp-win-x64(1)\\OmniSharp.exe")
+(defvar omnisharp-exe-path "c:\\omnisharp\\OmniSharp.exe")
 
 ;; Font size
 
@@ -114,12 +116,26 @@
 (global-set-key (kbd "C-x C-O") 'other-frame)
 (global-set-key (kbd "C-c C-o") #'xah-show-in-desktop)
 (global-set-key (kbd "C-c C-j") #'replace-last-sexp)
+(global-set-key (kbd "C-c t c") #'avax-checkout-current-file)
 
 ;; END
 ;; CONFIG REGION
 
 ;; FUNCTION REGION
 ;; BEGIN
+
+(defun avax-checkout-current-file ()
+  (interactive)
+  (let ((current-file-name (buffer-file-name)))
+    (setq exitcode (call-process tf-exe
+                                 nil
+                                 "*TFS*"
+                                 nil
+                                 "checkout"
+                                 current-file-name))
+    (if (equal exitcode 0)
+        (revert-buffer t t)
+      (error "Checkout of %s was unsuccessful (%S)" current-file-name exitcode))))
 
 (defun run-powershell ()
   "Run powershell"
@@ -243,6 +259,11 @@ Version 2018-01-13"
   ;; Following line is not needed if use-package.el is in ~/.emacs.d
   (add-to-list 'load-path "~/.emacs.d/elpa/use-package-20171226.1104/")
   (require 'use-package))
+
+(use-package tfsmacs
+  :ensure t
+  :config
+  (setq tfsmacs-cmd "C:/HomeFolder/TEE-CLC-14.134.0/tf.cmd"))
 
 (use-package flx
   :ensure t)
@@ -676,6 +697,12 @@ Version 2018-01-13"
     (ivy-switch-buffer)
     (god-local-mode))
   (god-mode-all)
+  ;; I don't want to exclude special modes from god-mode
+  (setq god-exempt-predicates
+        (list #'god-exempt-mode-p
+        #'god-comint-mode-p
+        #'god-git-commit-mode-p
+        #'god-view-mode-p))
   :bind (("<escape>" . god-local-mode)
          ("C-'" . god-local-mode)
          :map god-local-mode-map
@@ -837,3 +864,6 @@ Version 2018-01-13"
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+(fset 'extract
+   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([134217788 67108896 134217790 134217847 24 111 25 16 16 16 16 16 16 105 67 104 101 99 107 112 111 105 110 116 44 14 14 1 76 111 103 82 backspace 87 114 105 116 101 114 44 14 14 1 87 111 114 107 108 111 97 100 44 134217790 escape 120 115 120 111] 0 "%d")) arg)))
