@@ -112,6 +112,8 @@
 (setq show-paren-delay 0)
 (show-paren-mode t)
 
+(add-to-list 'default-frame-alist '(font . "Lucida Console" ))
+
 (global-set-key (kbd "C-'") #'save-shortcut-to-current-buffer)
 (global-set-key (kbd "C-x C-O") 'other-frame)
 (global-set-key (kbd "C-c C-o") #'xah-show-in-desktop)
@@ -535,7 +537,12 @@ Version 2018-01-13"
         '((swiper . ivy--regex-plus)
           (t      . ivy--regex-fuzzy)))
   (ivy-mode 1)
-  (bind-key "C-c C-r" 'ivy-resume))
+  (bind-key "C-c C-r" 'ivy-resume)
+  (ivy-set-actions
+   'ivy-switch-buffer
+   '(("j" switch-to-buffer-other-frame "other frame")
+     ("k" kill-buffer "kill")
+     ("r" ivy--rename-buffer-action "rename"))))
 
 (use-package swiper
   :ensure t
@@ -714,7 +721,7 @@ Version 2018-01-13"
               ("C-x C-3" . split-window-right)
               ("C-x C-0" . delete-window)
               ("C-x C-o" . other-window)
-              ("C-x C-b" . god-mode-switch-buffer)))
+              ("C-x C-b" . ivy-switch-buffer)))
 
 ;; Preview snippets with Ivy
 (use-package ivy-yasnippet
@@ -731,10 +738,13 @@ Version 2018-01-13"
       t))
   (server-start))
 
-(use-package moe-theme
+(use-package moe-light-theme
   :ensure t
+  :disabled
   :config
-  (load-theme 'moe-light t))
+  (load-theme 'moe-ligaht t))
+
+(load-theme 'gruvbox t)
 
 (use-package monokai-theme
   :ensure t
@@ -777,6 +787,11 @@ Version 2018-01-13"
   :ensure t
   :config
   (smooth-scrolling-mode 1))
+
+(use-package aggressive-mode
+  :ensure t
+  :config
+  (aggressive-indent-mode 1))
 
 ;; END
 ;; PACKAGES REGION
@@ -852,10 +867,11 @@ Version 2018-01-13"
  '(cua-mode nil nil (cua-base))
  '(custom-safe-themes
    (quote
-    ("585942bb24cab2d4b2f74977ac3ba6ddbd888e3776b9d2f993c5704aa8bb4739" "b583823b9ee1573074e7cbfd63623fe844030d911e9279a7c8a5d16de7df0ed0" "5acb6002127f5d212e2d31ba2ab5503df9cd1baa1200fbb5f57cc49f6da3056d" "1436d643b98844555d56c59c74004eb158dc85fc55d2e7205f8d9b8c860e177f" "13d20048c12826c7ea636fbe513d6f24c0d43709a761052adbca052708798ce3" "2cfc1cab46c0f5bae8017d3603ea1197be4f4fff8b9750d026d19f0b9e606fae" "c3d4af771cbe0501d5a865656802788a9a0ff9cf10a7df704ec8b8ef69017c68" default)))
+    ("4e132458143b6bab453e812f03208075189deca7ad5954a4abb27d5afce10a9a" "155a5de9192c2f6d53efcc9c554892a0d87d87f99ad8cc14b330f4f4be204445" "b0fd04a1b4b614840073a82a53e88fe2abc3d731462d6fde4e541807825af342" "cdb3e7a8864cede434b168c9a060bf853eeb5b3f9f758310d2a2e23be41a24ae" "e3c87e869f94af65d358aa279945a3daf46f8185f1a5756ca1c90759024593dd" "34c99997eaa73d64b1aaa95caca9f0d64229871c200c5254526d0062f8074693" "d2b4a5ffd5348f6e0cd2651b349414e741a876bbd6f2e1013c4bf82939781f66" "ef4edbfc3ec509612f3cf82476beddd2aeb3da7bdc3a35726337a0cc838a4ef4" "427fa665823299f8258d8e27c80a1481edbb8f5463a6fb2665261e9076626710" "8c847a5675ece40017de93045a28ebd9ede7b843469c5dec78988717f943952a" "f5568ed375abea716d1bdfae0316d1d179f69972eaccd1f331b3e9863d7e174a" "6bc387a588201caf31151205e4e468f382ecc0b888bac98b2b525006f7cb3307" "7803ff416cf090613afd3b4c3de362e64063603522d4974bcae8cfa53cf1fd1b" "585942bb24cab2d4b2f74977ac3ba6ddbd888e3776b9d2f993c5704aa8bb4739" "b583823b9ee1573074e7cbfd63623fe844030d911e9279a7c8a5d16de7df0ed0" "5acb6002127f5d212e2d31ba2ab5503df9cd1baa1200fbb5f57cc49f6da3056d" "1436d643b98844555d56c59c74004eb158dc85fc55d2e7205f8d9b8c860e177f" "13d20048c12826c7ea636fbe513d6f24c0d43709a761052adbca052708798ce3" "2cfc1cab46c0f5bae8017d3603ea1197be4f4fff8b9750d026d19f0b9e606fae" "c3d4af771cbe0501d5a865656802788a9a0ff9cf10a7df704ec8b8ef69017c68" default)))
+ '(debug-on-error t)
  '(package-selected-packages
    (quote
-    (diminish smooth-scrolling smooth-scroll eopengrok nswbuff-mode expand-region nswbuf keyfreq shx change-inner pt doom-themes gruvbox-theme jump-char sx smartparens back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile treemacs fsharp-mode monokai ivy-yasnippet yasnippet-snippets goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets omnisharp neotree multiple-cursors moe-theme ivy-youtube ivy-hydra goto-last-change go-mode flx elpy crux counsel-spotify counsel-projectile cider bm async angular-mode ace-window)))
+    (exwm aggressive-mode agressive-indent-mode agressive-indent aggressive-indent cyberpunk-2019-theme cyberpunk-theme ahk-mode alert auto-complete avk-emacs-themes bind-key clojure-mode codesearch company-flx company-go company-irony counsel counsel-codesearch counsel-etags counsel-gtags csharp-mode elog epl espresso-theme f find-file-in-project flycheck forest-blue-theme ghub git-commit github-modern-theme go-complete go-dlv go-guru go-imports go-playground go-projectile go-rename highlight-indentation ht irony magit markdown-mode modern-cpp-font-lock monokai-theme org-category-capture pfuture pkg-info popup powerline diminish smooth-scrolling smooth-scroll eopengrok nswbuff-mode expand-region nswbuf keyfreq shx change-inner pt doom-themes gruvbox-theme jump-char sx smartparens back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile treemacs fsharp-mode monokai ivy-yasnippet yasnippet-snippets goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets omnisharp neotree multiple-cursors moe-theme ivy-youtube ivy-hydra goto-last-change go-mode flx elpy crux counsel-spotify counsel-projectile cider bm async angular-mode ace-window)))
  '(smooth-scroll-mode nil)
  '(smooth-scrolling-mode t))
 (custom-set-faces
@@ -863,7 +879,8 @@ Version 2018-01-13"
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(org-todo ((t (:background "snow" :foreground "#fb4933" :weight bold))))
+ '(which-func ((t (:foreground "light sky blue")))))
 
 (fset 'extract
    (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([134217788 67108896 134217790 134217847 24 111 25 16 16 16 16 16 16 105 67 104 101 99 107 112 111 105 110 116 44 14 14 1 76 111 103 82 backspace 87 114 105 116 101 114 44 14 14 1 87 111 114 107 108 111 97 100 44 134217790 escape 120 115 120 111] 0 "%d")) arg)))
