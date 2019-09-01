@@ -791,7 +791,7 @@ Version 2018-01-13"
   :config
   (smooth-scrolling-mode 1))
 
-(use-package aggressive-mode
+(use-package aggressive-indent
   :ensure t
   :config
   (aggressive-indent-mode 1))
