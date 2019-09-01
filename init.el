@@ -112,7 +112,9 @@
 (setq show-paren-delay 0)
 (show-paren-mode t)
 
-(add-to-list 'default-frame-alist '(font . "Lucida Console" ))
+(add-to-list 'default-frame-alist `(font . ,(if (eq window-system 'w32)
+                                                "Lucida Console"
+                                              "DejaVu Sans Mono")  ))
 
 (global-set-key (kbd "C-'") #'save-shortcut-to-current-buffer)
 (global-set-key (kbd "C-x C-O") 'other-frame)
@@ -629,16 +631,17 @@ Version 2018-01-13"
   :disabled
   :ensure t)
 
-(use-package searcheverything
-  :ensure t
-  :config
-  (defun searcheverything-thing-at-point ()
-    (interactive)
-    (let ((thingatpoint (thing-at-point 'filename)))
-      (searcheverything-execute-query thingatpoint)))
-  (setq searcheverything-cli-path (concat everything-cli-install-dir "es.exe"))
-  :bind (("C-h e" . searcheverything-execute-query)
-         ("C-h t" . searcheverything-thing-at-point)))
+(when (eq window-system 'w32)
+  (use-package searcheverything
+    :ensure t
+    :config
+    (defun searcheverything-thing-at-point ()
+      (interactive)
+      (let ((thingatpoint (thing-at-point 'filename)))
+        (searcheverything-execute-query thingatpoint)))
+    (setq searcheverything-cli-path (concat everything-cli-install-dir "es.exe"))
+    :bind (("C-h e" . searcheverything-execute-query)
+           ("C-h t" . searcheverything-thing-at-point))))
 
 ;; Move to the beginning/end of line or code
 (use-package mwim
