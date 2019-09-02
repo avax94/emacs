@@ -24,6 +24,8 @@
 
 (defvar everything-cli-install-dir "E:/ES-1.1.0.10/")
 
+(defvar keyfreq-file-path "D:/.emacs.d/.emacs.keyfreq")
+
 (defvar avax-temporal-directory (concat user-emacs-directory "tmp/"))
 (unless (file-exists-p avax-temporal-directory)
   (make-directory avax-temporal-directory))
@@ -121,6 +123,14 @@
 (global-set-key (kbd "C-c C-o") #'xah-show-in-desktop)
 (global-set-key (kbd "C-c C-j") #'replace-last-sexp)
 (global-set-key (kbd "C-c t c") #'avax-checkout-current-file)
+
+(defun my-c++-mode-hook ()
+  (setq c-basic-offset 4)
+  (setq tab-width 4)
+  (c-set-offset 'substatement-open 0))
+(add-hook 'c++-mode-hook 'my-c++-mode-hook)
+(setq auto-mode-alist (append '(("\\.inl$" . c++-mode))
+                                auto-mode-alist))
 
 ;; END
 ;; CONFIG REGION
@@ -269,6 +279,7 @@ Version 2018-01-13"
   :config
   (setq tfsmacs-cmd "C:/HomeFolder/TEE-CLC-14.134.0/tf.cmd"))
 
+
 (use-package flx
   :ensure t)
 
@@ -307,7 +318,6 @@ Version 2018-01-13"
     (interactive)
     (let* ((org-agenda-files (list org-mode-scratch-file)))
       (org-tags-view)))
-  (setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
   (defun org-get-non-todo-headlines (org-file)
     "Gets all non-todo headlines"
     (with-current-buffer (find-file-noselect org-file)
@@ -323,7 +333,7 @@ Version 2018-01-13"
     (interactive)
     (let* ((headlines (org-get-non-todo-headlines org-file))
            (picked-headline (completing-read "Pick headline: "
-                                            (mapcar (lambda (x) (car x)) headlines))))
+                                             (mapcar (lambda (x) (car x)) headlines))))
       (with-current-buffer (find-file-noselect org-file)
         (goto-char (cdr (assoc picked-headline headlines)))
         (end-of-line))))
@@ -334,26 +344,31 @@ Version 2018-01-13"
     (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
   (use-package org-protocol)
   (setq org-directory org-mode-directory)
-  (setq org-agenda-files `(,(concat org-directory "/projects.org")))
+  (setq org-agenda-files `(,(concat org-directory "/projects.org")
+                           ,(concat org-directory "/inbox.org")))
   (setq org-main-agenda-file (concat org-directory "/projects.org"))
-  (setq org-refile-targets '((org-agenda-files :tag . "TASKGROUP")))
+  (setq org-inbox-file (concat org-directory "/inbox.org"))
+  (setq org-refile-targets '(("E:/org-mode/connect-period.org" :maxlevel . 1)
+                             ("E:/org-mode/inbox.org" :maxlevel . 1)
+                             ("E:/org-mode/someday.org" :maxlevel . 1)
+                             (org-agenda-files :tag . "TASKGROUP")))
   (setq org-agenda-hide-tags-regexp "TASKGROUP")
   (setq org-default-notes-file (concat org-directory "/notes.org"))
   (setq org-capture-templates
         '(("t"
            "TODO entry without file capture"
            entry
-           (file+headline org-main-agenda-file "RandomTasks")
+           (file+headline org-inbox-file "RandomTasks")
            "* TODO %?%i")
           ("f"
            "TODO entry with file capture"
            entry
-           (file+headline org-main-agenda-file "RandomTasks")
+           (file+headline org-inbox-file "RandomTasks")
            "* TODO %?%i \n%a")
           ("l"
            "TODO entry under selected headline + file"
            entry
-           (file+function  org-main-agenda-file (lambda () (org-capture-non-todo-headlines-function org-main-agenda-file)))
+           (file+function  org-inbox-file (lambda () (org-capture-non-todo-headlines-function org-main-agenda-file)))
            "* TODO %i \n%a")
           ("h"
            "TODO entry under selected headline"
@@ -448,14 +463,18 @@ Version 2018-01-13"
   (counsel-projectile-mode 1)
   :bind (("C-; ." . projectile-pt)))
 
+
+
 ;;Omnisharp is slowing me down - stop it
 (use-package omnisharp
   :init
+  :disabled
   (eval-after-load
       'company
     '(add-to-list 'company-backends 'company-omnisharp))
   :diminish omnisharp-mode
   :config
+
   (defun my-csharp-mode-setup ()
     (omnisharp-mode)
     (company-mode)
@@ -702,6 +721,7 @@ Version 2018-01-13"
   (add-hook 'god-mode-disabled-hook 'my-update-cursor)
   (add-to-list 'god-exempt-major-modes 'dired-mode)
   (add-to-list 'god-exempt-major-modes 'org-agenda-mode)
+  (setq god-mode-global nil)
   (defun god-mode-switch-buffer ()
     (interactive)
     (ivy-switch-buffer)
@@ -710,21 +730,21 @@ Version 2018-01-13"
   ;; I don't want to exclude special modes from god-mode
   (setq god-exempt-predicates
         (list #'god-exempt-mode-p
-        #'god-comint-mode-p
-        #'god-git-commit-mode-p
-        #'god-view-mode-p))
+              #'god-comint-mode-p
+              #'god-git-commit-mode-p
+              #'god-view-mode-p))
   :bind (("<escape>" . god-local-mode)
          ("C-'" . god-local-mode)
          :map god-local-mode-map
-              ("z" . repeat)
-              ("i" . god-local-mode)
-              ("C-c C-i" . change-inner)
-              ("C-x C-1" . delete-other-windows)
-              ("C-x C-2" . split-window-below)
-              ("C-x C-3" . split-window-right)
-              ("C-x C-0" . delete-window)
-              ("C-x C-o" . other-window)
-              ("C-x C-b" . ivy-switch-buffer)))
+         ("z" . repeat)
+         ("i" . god-local-mode)
+         ("C-c C-i" . change-inner)
+         ("C-x C-1" . delete-other-windows)
+         ("C-x C-2" . split-window-below)
+         ("C-x C-3" . split-window-right)
+         ("C-x C-0" . delete-window)
+         ("C-x C-o" . other-window)
+         ("C-x C-b" . ivy-switch-buffer)))
 
 ;; Preview snippets with Ivy
 (use-package ivy-yasnippet
@@ -783,6 +803,7 @@ Version 2018-01-13"
 (use-package keyfreq
   :ensure t
   :config
+  (setq keyfreq-file keyfreq-file-path)
   (keyfreq-mode 1)
   (keyfreq-autosave-mode 1))
 
@@ -791,10 +812,23 @@ Version 2018-01-13"
   :config
   (smooth-scrolling-mode 1))
 
+(use-package beacon
+  :ensure t
+  :config
+  (beacon-mode 1)
+  (setq
+   beacon-size 100
+   beacon-blink-when-window-scrolls nil))
+
 (use-package aggressive-indent
   :ensure t
   :config
   (aggressive-indent-mode 1))
+
+(use-package linum-relative
+  :ensure t
+  :config
+  (linum-relative-on))
 
 ;; END
 ;; PACKAGES REGION
@@ -802,7 +836,7 @@ Version 2018-01-13"
 ;; SAVED MACROS REGION
 ;; BEGIN
 (fset 'parsingDISKSPD
-   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([15 19 67 111 109 109 97 110 100 return 134217830 134217830 134217826 67108896 5 134217847 134217788 25 44 19 98 108 111 99 107 32 115 105 122 101 return 5 67108896 134217826 134217847 134217788 5 25 19 117 115 105 110 103 return 134217830 134217826 67108896 134217830 134217847 134217788 5 44 25 19 111 117 116 115 116 97 110 100 105 110 103 return 5 67108896 134217826 134217847 134217788 5 44 25 19 104 backspace 116 104 114 101 97 100 115 backspace 32 99 111 117 110 116 return 5 67108896 134217826 134217847 134217788 5 44 25 19 112 114 111 99 32 99 111 117 110 116 return 5 67108896 134217826 134217847 134217788 5 44 25 19 98 121 116 101 115 return 14 134217830 134217830 67108896 134217826 134217847 134217788 5 44 25 19 73 47 79 115 return 14 14 134217830 67108896 134217826 134217847 134217788 5 44 25 19 77 105 66 47 115 return 14 14 134217830 67108896 134217730 134217730 134217847 134217788 5 44 25 19 112 101 114 32 115 14 14 return 14 14 67108896 134217730 134217730 134217847 134217788 5 44 25 19 65 118 103 76 97 116 return 14 14 134217830 67108896 134217826 134217826 134217847 134217788 5 44 25 20 19 76 97 116 83 116 100 68 101 118 return 14 14 67108896 134217826 134217826 134217847 134217788 5 44 25] 0 "%d")) arg)))
+      (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([15 19 67 111 109 109 97 110 100 return 134217830 134217830 134217826 67108896 5 134217847 134217788 25 44 19 98 108 111 99 107 32 115 105 122 101 return 5 67108896 134217826 134217847 134217788 5 25 19 117 115 105 110 103 return 134217830 134217826 67108896 134217830 134217847 134217788 5 44 25 19 111 117 116 115 116 97 110 100 105 110 103 return 5 67108896 134217826 134217847 134217788 5 44 25 19 104 backspace 116 104 114 101 97 100 115 backspace 32 99 111 117 110 116 return 5 67108896 134217826 134217847 134217788 5 44 25 19 112 114 111 99 32 99 111 117 110 116 return 5 67108896 134217826 134217847 134217788 5 44 25 19 98 121 116 101 115 return 14 134217830 134217830 67108896 134217826 134217847 134217788 5 44 25 19 73 47 79 115 return 14 14 134217830 67108896 134217826 134217847 134217788 5 44 25 19 77 105 66 47 115 return 14 14 134217830 67108896 134217730 134217730 134217847 134217788 5 44 25 19 112 101 114 32 115 14 14 return 14 14 67108896 134217730 134217730 134217847 134217788 5 44 25 19 65 118 103 76 97 116 return 14 14 134217830 67108896 134217826 134217826 134217847 134217788 5 44 25 20 19 76 97 116 83 116 100 68 101 118 return 14 14 67108896 134217826 134217826 134217847 134217788 5 44 25] 0 "%d")) arg)))
 
 
 (fset 'modify_kusto_query
@@ -867,14 +901,18 @@ Version 2018-01-13"
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(beacon-mode t)
  '(cua-mode nil nil (cua-base))
  '(custom-safe-themes
    (quote
     ("4e132458143b6bab453e812f03208075189deca7ad5954a4abb27d5afce10a9a" "155a5de9192c2f6d53efcc9c554892a0d87d87f99ad8cc14b330f4f4be204445" "b0fd04a1b4b614840073a82a53e88fe2abc3d731462d6fde4e541807825af342" "cdb3e7a8864cede434b168c9a060bf853eeb5b3f9f758310d2a2e23be41a24ae" "e3c87e869f94af65d358aa279945a3daf46f8185f1a5756ca1c90759024593dd" "34c99997eaa73d64b1aaa95caca9f0d64229871c200c5254526d0062f8074693" "d2b4a5ffd5348f6e0cd2651b349414e741a876bbd6f2e1013c4bf82939781f66" "ef4edbfc3ec509612f3cf82476beddd2aeb3da7bdc3a35726337a0cc838a4ef4" "427fa665823299f8258d8e27c80a1481edbb8f5463a6fb2665261e9076626710" "8c847a5675ece40017de93045a28ebd9ede7b843469c5dec78988717f943952a" "f5568ed375abea716d1bdfae0316d1d179f69972eaccd1f331b3e9863d7e174a" "6bc387a588201caf31151205e4e468f382ecc0b888bac98b2b525006f7cb3307" "7803ff416cf090613afd3b4c3de362e64063603522d4974bcae8cfa53cf1fd1b" "585942bb24cab2d4b2f74977ac3ba6ddbd888e3776b9d2f993c5704aa8bb4739" "b583823b9ee1573074e7cbfd63623fe844030d911e9279a7c8a5d16de7df0ed0" "5acb6002127f5d212e2d31ba2ab5503df9cd1baa1200fbb5f57cc49f6da3056d" "1436d643b98844555d56c59c74004eb158dc85fc55d2e7205f8d9b8c860e177f" "13d20048c12826c7ea636fbe513d6f24c0d43709a761052adbca052708798ce3" "2cfc1cab46c0f5bae8017d3603ea1197be4f4fff8b9750d026d19f0b9e606fae" "c3d4af771cbe0501d5a865656802788a9a0ff9cf10a7df704ec8b8ef69017c68" default)))
  '(debug-on-error t)
+ '(org-agenda-files
+   (quote
+    ("e:/org-mode/inbox.org" "e:/org-mode/projects.org")))
  '(package-selected-packages
    (quote
-    (exwm aggressive-mode agressive-indent-mode agressive-indent aggressive-indent cyberpunk-2019-theme cyberpunk-theme ahk-mode alert auto-complete avk-emacs-themes bind-key clojure-mode codesearch company-flx company-go company-irony counsel counsel-codesearch counsel-etags counsel-gtags csharp-mode elog epl espresso-theme f find-file-in-project flycheck forest-blue-theme ghub git-commit github-modern-theme go-complete go-dlv go-guru go-imports go-playground go-projectile go-rename highlight-indentation ht irony magit markdown-mode modern-cpp-font-lock monokai-theme org-category-capture pfuture pkg-info popup powerline diminish smooth-scrolling smooth-scroll eopengrok nswbuff-mode expand-region nswbuf keyfreq shx change-inner pt doom-themes gruvbox-theme jump-char sx smartparens back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile treemacs fsharp-mode monokai ivy-yasnippet yasnippet-snippets goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets omnisharp neotree multiple-cursors moe-theme ivy-youtube ivy-hydra goto-last-change go-mode flx elpy crux counsel-spotify counsel-projectile cider bm async angular-mode ace-window)))
+    (linum-relative-mode linum-relative aggressive-indent-mode ag beacon exwm aggressive-mode agressive-indent-mode agressive-indent aggressive-indent cyberpunk-2019-theme cyberpunk-theme ahk-mode alert auto-complete avk-emacs-themes bind-key clojure-mode codesearch company-flx company-go company-irony counsel counsel-codesearch counsel-etags counsel-gtags csharp-mode elog epl espresso-theme f find-file-in-project flycheck forest-blue-theme ghub git-commit github-modern-theme go-complete go-dlv go-guru go-imports go-playground go-projectile go-rename highlight-indentation ht irony markdown-mode modern-cpp-font-lock monokai-theme org-category-capture pfuture pkg-info popup powerline diminish smooth-scrolling smooth-scroll nswbuff-mode expand-region nswbuf keyfreq shx change-inner pt doom-themes gruvbox-theme jump-char sx smartparens back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile treemacs fsharp-mode monokai ivy-yasnippet yasnippet-snippets goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets omnisharp neotree multiple-cursors moe-theme ivy-youtube ivy-hydra goto-last-change go-mode flx elpy crux counsel-spotify counsel-projectile cider bm async angular-mode ace-window)))
  '(smooth-scroll-mode nil)
  '(smooth-scrolling-mode t))
 (custom-set-faces
@@ -882,6 +920,8 @@ Version 2018-01-13"
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(mode-line ((t (:background "light cyan" :foreground "dark slate gray" :box nil))))
+ '(mode-line-inactive ((t (:background "lavender" :foreground "#a89984" :box nil))))
  '(org-todo ((t (:background "snow" :foreground "#fb4933" :weight bold))))
  '(which-func ((t (:foreground "light sky blue")))))
 

@@ -3,20 +3,34 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        Buffer-menu-delete
+        Buffer-menu-mark
         backward-sexp
         bm-toggle
+        c-electric-brace
         c-electric-delete-forward
+        c-electric-paren
+        c-electric-semi&comma
+        c-electric-slash
+        c-electric-star
+        c-indent-line-or-region
+        change-inner
         crux-eval-and-replace
         dabbrev-expand
         dired-do-flagged-delete
         dired-flag-file-deletion
+        dired-unmark-backward
         electric-newline-and-maybe-indent
         end-of-buffer
         forward-sexp
         hydra--negative-argument
         ignore
         indent-for-tab-command
+        jump-char-forward
+        jump-char-process-char
         kill-region
+        mwim-beginning-of-code-or-line
+        mwim-end-of-code-or-line
         nxml-electric-slash
         org-beginning-of-line
         org-cycle
@@ -27,6 +41,8 @@
         org-open-line
         org-self-insert-command
         org-todo
+        package-menu-mark-unmark
+        package-menu-mark-upgrades
         paredit-backward
         paredit-forward
         paredit-forward-delete
@@ -34,7 +50,9 @@
         paredit-open-round
         replace-last-sexp
         swiper
+        toggle-input-method
         transpose-words
+        undefined
         yaml-electric-dash-and-dot
         zap-to-char
         ))
@@ -43,6 +61,8 @@
       '(
         beginning-of-buffer
         counsel-M-x
+        god-local-mode
+        god-mode-self-insert
         hydra--digit-argument
         mc-hydra/body
         mc-hydra/mc/mark-next-like-this
@@ -50,8 +70,12 @@
         mc-hydra/mc/mark-previous-like-this
         mc-hydra/mc/mark-previous-lines
         mc-hydra/nil
+        mouse-set-region
         paredit-backslash
+        suspend-frame
         swiper
         text-scale-adjust
+        wdired-exit
+        xah-show-in-desktop
         yaml-electric-backspace
         ))
