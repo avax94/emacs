@@ -18,6 +18,8 @@
 
 (defvar ggtags-exec-path "C:/Ggtags/bin")
 
+(defvar use-evil nil)
+
 (defvar tf-exe "C:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/Common7/IDE/CommonExtensions/Microsoft/TeamFoundation/Team Explorer/TF.exe")
 
 (defvar python-exec-path "C:/Users/v-milast/AppData/Local/Programs/Python/Python37/")
@@ -124,6 +126,12 @@
 (global-set-key (kbd "C-c C-j") #'replace-last-sexp)
 (global-set-key (kbd "C-c t c") #'avax-checkout-current-file)
 
+;; END
+;; CONFIG REGION
+
+;; FUNCTION REGION
+;; BEGIN
+
 (defun my-c++-mode-hook ()
   (setq c-basic-offset 4)
   (setq tab-width 4)
@@ -131,12 +139,6 @@
 (add-hook 'c++-mode-hook 'my-c++-mode-hook)
 (setq auto-mode-alist (append '(("\\.inl$" . c++-mode))
                                 auto-mode-alist))
-
-;; END
-;; CONFIG REGION
-
-;; FUNCTION REGION
-;; BEGIN
 
 (defun avax-checkout-current-file ()
   (interactive)
@@ -178,6 +180,7 @@
   (let ((value (eval (preceding-sexp))))
     (kill-sexp -1)
     (insert (format "%S" value))))
+
 
 (defun xah-show-in-desktop ()
   "Show current file in desktop.
@@ -279,6 +282,9 @@ Version 2018-01-13"
   :config
   (setq tfsmacs-cmd "C:/HomeFolder/TEE-CLC-14.134.0/tf.cmd"))
 
+(use-package nv-delete-back
+  :ensure t
+  :bind (([remap backward-kill-word] . nv-delete-back-word)))
 
 (use-package flx
   :ensure t)
@@ -415,7 +421,7 @@ Version 2018-01-13"
   (add-hook 'c-mode-common-hook
             (lambda ()
               (when (derived-mode-p 'csharp-mode 'c-mode 'c++-mode 'java-mode)
-                (ggtags-mode 1))))
+                (ggtags-mode))))
   :bind (("M-;" . ggtags-find-tag-dwim)
          ("M-]" . ggtags-find-reference)
          ("C-c g t" . ggtags-find-tag-dwim)
@@ -431,7 +437,6 @@ Version 2018-01-13"
   :config
   (setq whitespace-line-column 150)
   (setq whitespace-style '(whitespace tab-mark space-mark empty trailing)))
-;; limit line length
 
 (use-package codesearch
   :ensure t
@@ -462,8 +467,6 @@ Version 2018-01-13"
   (projectile-mode 1)
   (counsel-projectile-mode 1)
   :bind (("C-; ." . projectile-pt)))
-
-
 
 ;;Omnisharp is slowing me down - stop it
 (use-package omnisharp
@@ -570,6 +573,11 @@ Version 2018-01-13"
   :bind
   ("C-s" . swiper))
 
+(use-package
+  :ensure t
+  :bind
+  ("C-s" . swiper))
+
 (use-package counsel
   :ensure t
   :config
@@ -671,10 +679,6 @@ Version 2018-01-13"
 (use-package diminish
   :ensure t)
 
-(use-package goto-chg
-  :ensure t
-  :bind ("C-," . goto-last-change))
-
 ;; Handling capitalized subwords in a nomenclature
 (use-package subword
   :ensure nil
@@ -709,42 +713,47 @@ Version 2018-01-13"
   :config (setq nswbuff-buffer-list-function #'nswbuff-projectile-buffer-list
                 nswbuff-display-intermediate-buffers t))
 
-(use-package god-mode
-  :ensure t
-  :init
-  (defun my-update-cursor ()
-    (setq cursor-type (if (or god-local-mode buffer-read-only)
-                          'box
-                        'bar)))
-  :config
-  (add-hook 'god-mode-enabled-hook 'my-update-cursor)
-  (add-hook 'god-mode-disabled-hook 'my-update-cursor)
-  (add-to-list 'god-exempt-major-modes 'dired-mode)
-  (add-to-list 'god-exempt-major-modes 'org-agenda-mode)
-  (setq god-mode-global nil)
-  (defun god-mode-switch-buffer ()
-    (interactive)
-    (ivy-switch-buffer)
-    (god-local-mode))
-  (god-mode-all)
-  ;; I don't want to exclude special modes from god-mode
-  (setq god-exempt-predicates
-        (list #'god-exempt-mode-p
-              #'god-comint-mode-p
-              #'god-git-commit-mode-p
-              #'god-view-mode-p))
-  :bind (("<escape>" . god-local-mode)
-         ("C-'" . god-local-mode)
-         :map god-local-mode-map
-         ("z" . repeat)
-         ("i" . god-local-mode)
-         ("C-c C-i" . change-inner)
-         ("C-x C-1" . delete-other-windows)
-         ("C-x C-2" . split-window-below)
-         ("C-x C-3" . split-window-right)
-         ("C-x C-0" . delete-window)
-         ("C-x C-o" . other-window)
-         ("C-x C-b" . ivy-switch-buffer)))
+(if (not use-evil)
+    (use-package god-mode
+      :ensure t
+      :init
+      (defun my-update-cursor ()
+        (setq cursor-type (if (or god-local-mode buffer-read-only)
+                              'box
+                            'bar)))
+      (god-mode-all)
+      :config
+      (add-hook 'god-mode-enabled-hook 'my-update-cursor)
+      (add-hook 'god-mode-disabled-hook 'my-update-cursor)
+      (add-to-list 'god-exempt-major-modes 'dired-mode)
+      (add-to-list 'god-exempt-major-modes 'org-agenda-mode)
+      (setq god-mode-global nil)
+      (defun god-mode-switch-buffer ()
+        (interactive)
+        (ivy-switch-buffer)
+        (god-local-mode))
+      ;; I don't want to exclude special modes from god-mode
+      (setq god-exempt-predicates
+            (list #'god-exempt-mode-p
+                  #'god-comint-mode-p
+                  #'god-git-commit-mode-p
+                  #'god-view-mode-p))
+      :bind (("<escape>" . god-local-mode)
+             ("C-'" . god-local-mode)
+             :map god-local-mode-map
+             ("z" . repeat)
+             ("i" . god-local-mode)
+             ("C-c C-i" . change-inner)
+             ("C-x C-1" . delete-other-windows)
+             ("C-x C-2" . split-window-below)
+             ("C-x C-3" . split-window-right)
+             ("C-x C-0" . delete-window)
+             ("C-x C-o" . other-window)
+             ("C-x C-b" . ivy-switch-buffer)))
+  (use-package evil
+    :ensure t
+    :config
+    (evil-mode)))
 
 ;; Preview snippets with Ivy
 (use-package ivy-yasnippet
@@ -766,8 +775,6 @@ Version 2018-01-13"
   :disabled
   :config
   (load-theme 'moe-ligaht t))
-
-(load-theme 'gruvbox t)
 
 (use-package monokai-theme
   :ensure t
@@ -821,14 +828,39 @@ Version 2018-01-13"
    beacon-blink-when-window-scrolls nil))
 
 (use-package aggressive-indent
+  :disabled
   :ensure t
-  :config
-  (aggressive-indent-mode 1))
+  :hook ((prog-mode . aggressive-indent-mode)))
 
 (use-package linum-relative
   :ensure t
   :config
+  (global-linum-mode)
+  (setq linum-relative-mode t)
   (linum-relative-on))
+
+(use-package scratch
+  :ensure t
+  :bind (("C-[ C-s" . scratch)))
+
+(use-package move-text
+  :ensure t
+  :config
+  (move-text-default-bindings)
+  (advice-add :after 'move-text-up #'indent-according-to-mode)
+  (advice-add :after 'move-text-down #'indent-according-to-mode)
+  :bind (([(control shift n)] . move-text-down)
+         ([(control shift p)] . move-text-up)))
+
+(use-package wrap-region
+  :ensure t
+  :config
+  (wrap-region-global-mode))
+
+(use-package base16-theme
+  :ensure t
+  :config
+  (load-theme 'base16-isotope t))
 
 ;; END
 ;; PACKAGES REGION
@@ -905,25 +937,36 @@ Version 2018-01-13"
  '(cua-mode nil nil (cua-base))
  '(custom-safe-themes
    (quote
-    ("4e132458143b6bab453e812f03208075189deca7ad5954a4abb27d5afce10a9a" "155a5de9192c2f6d53efcc9c554892a0d87d87f99ad8cc14b330f4f4be204445" "b0fd04a1b4b614840073a82a53e88fe2abc3d731462d6fde4e541807825af342" "cdb3e7a8864cede434b168c9a060bf853eeb5b3f9f758310d2a2e23be41a24ae" "e3c87e869f94af65d358aa279945a3daf46f8185f1a5756ca1c90759024593dd" "34c99997eaa73d64b1aaa95caca9f0d64229871c200c5254526d0062f8074693" "d2b4a5ffd5348f6e0cd2651b349414e741a876bbd6f2e1013c4bf82939781f66" "ef4edbfc3ec509612f3cf82476beddd2aeb3da7bdc3a35726337a0cc838a4ef4" "427fa665823299f8258d8e27c80a1481edbb8f5463a6fb2665261e9076626710" "8c847a5675ece40017de93045a28ebd9ede7b843469c5dec78988717f943952a" "f5568ed375abea716d1bdfae0316d1d179f69972eaccd1f331b3e9863d7e174a" "6bc387a588201caf31151205e4e468f382ecc0b888bac98b2b525006f7cb3307" "7803ff416cf090613afd3b4c3de362e64063603522d4974bcae8cfa53cf1fd1b" "585942bb24cab2d4b2f74977ac3ba6ddbd888e3776b9d2f993c5704aa8bb4739" "b583823b9ee1573074e7cbfd63623fe844030d911e9279a7c8a5d16de7df0ed0" "5acb6002127f5d212e2d31ba2ab5503df9cd1baa1200fbb5f57cc49f6da3056d" "1436d643b98844555d56c59c74004eb158dc85fc55d2e7205f8d9b8c860e177f" "13d20048c12826c7ea636fbe513d6f24c0d43709a761052adbca052708798ce3" "2cfc1cab46c0f5bae8017d3603ea1197be4f4fff8b9750d026d19f0b9e606fae" "c3d4af771cbe0501d5a865656802788a9a0ff9cf10a7df704ec8b8ef69017c68" default)))
+    ("2ad7a6de9652b0f29ced6ec4224fdc6a0c7c8b28ba032d34b37fa3586423a454" "d0f7d834242581e63a93d0231668c3571d5135debf79baa04ca8f9f5a323ed36" "f4d0d8d32b365beddf294f17b7830f96a9698a93a166542a0a2d3bbe29bb88f1" "1e7a42b56a3eeee6b466f531b7d909021641348cdb38c8838bebd383bd7d10a9" "65aa986e2e4ba6c444e904e4338eaa146d499e788079724964173b0f8f0c5b96" "6021811d1551a8415e4a9dde3c2ef57c9b2a4f93367bf25285762f4b11d29be8" "7b26aa0e97ae0756f629372d677bc30ad815c4bf21f5d2a931f21359470b18b0" "e31198977a3470364ef6bd2ed4488173656179d22179dabdc621f3c3e93edac9" "4e132458143b6bab453e812f03208075189deca7ad5954a4abb27d5afce10a9a" "155a5de9192c2f6d53efcc9c554892a0d87d87f99ad8cc14b330f4f4be204445" "b0fd04a1b4b614840073a82a53e88fe2abc3d731462d6fde4e541807825af342" "cdb3e7a8864cede434b168c9a060bf853eeb5b3f9f758310d2a2e23be41a24ae" "e3c87e869f94af65d358aa279945a3daf46f8185f1a5756ca1c90759024593dd" "34c99997eaa73d64b1aaa95caca9f0d64229871c200c5254526d0062f8074693" "d2b4a5ffd5348f6e0cd2651b349414e741a876bbd6f2e1013c4bf82939781f66" "ef4edbfc3ec509612f3cf82476beddd2aeb3da7bdc3a35726337a0cc838a4ef4" "427fa665823299f8258d8e27c80a1481edbb8f5463a6fb2665261e9076626710" "8c847a5675ece40017de93045a28ebd9ede7b843469c5dec78988717f943952a" "f5568ed375abea716d1bdfae0316d1d179f69972eaccd1f331b3e9863d7e174a" "6bc387a588201caf31151205e4e468f382ecc0b888bac98b2b525006f7cb3307" "7803ff416cf090613afd3b4c3de362e64063603522d4974bcae8cfa53cf1fd1b" "585942bb24cab2d4b2f74977ac3ba6ddbd888e3776b9d2f993c5704aa8bb4739" "b583823b9ee1573074e7cbfd63623fe844030d911e9279a7c8a5d16de7df0ed0" "5acb6002127f5d212e2d31ba2ab5503df9cd1baa1200fbb5f57cc49f6da3056d" "1436d643b98844555d56c59c74004eb158dc85fc55d2e7205f8d9b8c860e177f" "13d20048c12826c7ea636fbe513d6f24c0d43709a761052adbca052708798ce3" "2cfc1cab46c0f5bae8017d3603ea1197be4f4fff8b9750d026d19f0b9e606fae" "c3d4af771cbe0501d5a865656802788a9a0ff9cf10a7df704ec8b8ef69017c68" default)))
  '(debug-on-error t)
  '(org-agenda-files
    (quote
     ("e:/org-mode/inbox.org" "e:/org-mode/projects.org")))
  '(package-selected-packages
    (quote
-    (linum-relative-mode linum-relative aggressive-indent-mode ag beacon exwm aggressive-mode agressive-indent-mode agressive-indent aggressive-indent cyberpunk-2019-theme cyberpunk-theme ahk-mode alert auto-complete avk-emacs-themes bind-key clojure-mode codesearch company-flx company-go company-irony counsel counsel-codesearch counsel-etags counsel-gtags csharp-mode elog epl espresso-theme f find-file-in-project flycheck forest-blue-theme ghub git-commit github-modern-theme go-complete go-dlv go-guru go-imports go-playground go-projectile go-rename highlight-indentation ht irony markdown-mode modern-cpp-font-lock monokai-theme org-category-capture pfuture pkg-info popup powerline diminish smooth-scrolling smooth-scroll nswbuff-mode expand-region nswbuf keyfreq shx change-inner pt doom-themes gruvbox-theme jump-char sx smartparens back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile treemacs fsharp-mode monokai ivy-yasnippet yasnippet-snippets goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets omnisharp neotree multiple-cursors moe-theme ivy-youtube ivy-hydra goto-last-change go-mode flx elpy crux counsel-spotify counsel-projectile cider bm async angular-mode ace-window)))
+    (base16-theme w3 jump 0blayout telephone-line move-text jump-tree jumplist nv-delete-back hungry-delete scratch evil-mode linum-relative-mode linum-relative aggressive-indent-mode ag beacon exwm aggressive-mode agressive-indent-mode agressive-indent aggressive-indent cyberpunk-2019-theme cyberpunk-theme ahk-mode alert auto-complete avk-emacs-themes bind-key clojure-mode codesearch company-flx company-go company-irony counsel counsel-codesearch counsel-etags counsel-gtags csharp-mode elog epl espresso-theme f find-file-in-project flycheck forest-blue-theme ghub git-commit github-modern-theme go-complete go-dlv go-guru go-imports go-playground go-projectile go-rename highlight-indentation ht irony markdown-mode modern-cpp-font-lock monokai-theme org-category-capture pfuture pkg-info popup powerline diminish smooth-scrolling smooth-scroll nswbuff-mode expand-region nswbuf keyfreq shx change-inner pt doom-themes gruvbox-theme jump-char sx smartparens back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile treemacs fsharp-mode monokai ivy-yasnippet yasnippet-snippets goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets omnisharp neotree multiple-cursors moe-theme ivy-youtube ivy-hydra goto-last-change go-mode flx elpy crux counsel-spotify counsel-projectile cider bm async angular-mode ace-window)))
  '(smooth-scroll-mode nil)
- '(smooth-scrolling-mode t))
-(custom-set-faces
+ '(smooth-scrolling-mode t)
+ '(telephone-line-mode t))
+;;
+;;
+;;(custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(mode-line ((t (:background "light cyan" :foreground "dark slate gray" :box nil))))
- '(mode-line-inactive ((t (:background "lavender" :foreground "#a89984" :box nil))))
- '(org-todo ((t (:background "snow" :foreground "#fb4933" :weight bold))))
- '(which-func ((t (:foreground "light sky blue")))))
+ ;;'(mode-line ((t (:background "light cyan" :foreground "dark slate gray" :box nil))))
+ ;;'(mode-line-inactive ((t (:background "lavender" :foreground "#a89984" :box nil))))
+ ;; '(org-todo ((t (:background "snow" :foreground "#fb4933" :weight bold))))
+ ;;'(which-func ((t (:foreground "light sky blue"))))
+ ;;)
 
 (fset 'extract
    (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([134217788 67108896 134217790 134217847 24 111 25 16 16 16 16 16 16 105 67 104 101 99 107 112 111 105 110 116 44 14 14 1 76 111 103 82 backspace 87 114 105 116 101 114 44 14 14 1 87 111 114 107 108 111 97 100 44 134217790 escape 120 115 120 111] 0 "%d")) arg)))
+
+(fset 'itertemp
+   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([return 19 99 115 118 return return 19 36 103 101 110 return 1 67108896 5 134217847 24 111 25 15 134217790 24 111 24 98 return 19 46 46 1 92 6 92 return return 14] 0 "%d")) arg)))
+
+
+(fset 'lastmacro
+   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([return 134217848 105 116 101 114 return 134217848 105 116 101 114 return 134217848 return 134217848 return 19 92 46 92 46 return return 14] 0 "%d")) arg)))
