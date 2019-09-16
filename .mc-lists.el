@@ -8,6 +8,7 @@
         backward-sexp
         bm-toggle
         c-electric-brace
+        c-electric-colon
         c-electric-delete-forward
         c-electric-paren
         c-electric-semi&comma
@@ -41,6 +42,7 @@
         org-open-line
         org-self-insert-command
         org-todo
+        org-yank
         package-menu-mark-unmark
         package-menu-mark-upgrades
         paredit-backward
@@ -61,6 +63,8 @@
       '(
         beginning-of-buffer
         counsel-M-x
+        dired-maybe-insert-subdir
+        dired-toggle-read-only
         god-local-mode
         god-mode-self-insert
         hydra--digit-argument

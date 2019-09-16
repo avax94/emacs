@@ -575,11 +575,6 @@ Version 2018-01-13"
   :bind
   ("C-s" . swiper))
 
-(use-package
-  :ensure t
-  :bind
-  ("C-s" . swiper))
-
 (use-package counsel
   :ensure t
   :config
