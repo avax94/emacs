@@ -16,6 +16,9 @@
 ;; MODIFY -REGION
 ;; BEGIN
 
+;; Windows notifications program
+(defvar toast-notifier-path "E:/workspace/git/toaster/toast/bin/Release/toast.exe")
+
 (defvar ggtags-exec-path "C:/Ggtags/bin")
 
 (defvar use-evil nil)
@@ -322,6 +325,42 @@ Version 2018-01-13"
    ("C-c r"   . org-remember)
    ("C-c a" . org-agenda))
   :config
+;; Configure reminders in appointments
+  (defun toast-appt-display (min-to-app new-time msg)
+    (let ((notifications-info (cond ((listp min-to-app) (mapcar* #'cons min-to-app msg))
+                                    ((listp msg) (mapcar (lambda (x) (cons min-to-app x)) msg))
+                                    (t (list (cons min-to-app msg))))))
+      (loop for notification in notifications-info do
+            (toast-appt-send-notification
+             (format "Appointment in %s minutes" (car notification))    ;; passed to -t in toast call
+             (format "%s" (cdr notification))))))
+
+  (require 'appt)
+  (setq diary-file (concat org-mode-directory "/journal.appt"))
+  (setq appt-time-msg-list nil)    ;; clear existing appt list
+  (setq appt-display-interval '5)  ;; warn every 5 minutes from t - appt-message-warning-time
+  (setq
+   appt-message-warning-time '15  ;; send first warning 15 minutes before appointment
+   appt-display-mode-line nil     ;; don't show in the modeline
+   appt-display-format 'window)   ;; pass warnings to the designated window function
+  (appt-activate 1)                ;; activate appointment notification
+  (display-time)                   ;; activate time display
+  (org-agenda-to-appt)             ;; generate the appt list from org agenda files on emacs launch
+  (run-at-time "24:01" 900 'org-agenda-to-appt)           ;; update appt every 15mins
+
+  (add-hook 'org-capture-after-finalize-hook 'org-agenda-to-appt)
+
+  ;; set up the call to the notifier
+  (defun toast-appt-send-notification (title msg)
+    (shell-command (concat toast-notifier-path
+                           " -t \"" title "\""
+                           " -m \"" msg "\""
+                           " -p ~/.emacs.d/resources/org.png")))
+
+  (setq appt-disp-window-function (function toast-appt-display))
+
+  ;; Done configuring
+
   (defun org-scratch-search ()
     (interactive)
     (let* ((org-agenda-files (list org-mode-scratch-file)))
@@ -353,9 +392,11 @@ Version 2018-01-13"
   (use-package org-protocol)
   (setq org-directory org-mode-directory)
   (setq org-agenda-files `(,(concat org-directory "/projects.org")
-                           ,(concat org-directory "/inbox.org")))
+                           ,(concat org-directory "/inbox.org")
+                           ,(concat org-directory "/journal.org")))
   (setq org-main-agenda-file (concat org-directory "/projects.org"))
   (setq org-inbox-file (concat org-directory "/inbox.org"))
+  (setq org-journal-file (concat org-directory "/inbox.org"))
   (setq org-refile-targets '(("E:/org-mode/connect-period.org" :maxlevel . 1)
                              ("E:/org-mode/inbox.org" :maxlevel . 1)
                              ("E:/org-mode/someday.org" :maxlevel . 1)
@@ -392,7 +433,11 @@ Version 2018-01-13"
            "Scratchpad with file"
            entry
            (file+datetree org-mode-scratch-file)
-           "* %^{Description} %^g\n%T\n%a\n%i%?")))
+           "* %^{Description} %^g\n%T\n%a\n%i%?")
+          ("r" "Reminder" entry
+           (file+olp+datetree org-journal-file)
+           "* %? %T" :time-prompt t)
+          ))
   (advice-add 'org-agenda :around #'org-agenda-advice)
   (setq org-startup-truncated nil)
   (setq org-archive-location (concat org-archive-file "::* From %s")))
@@ -718,17 +763,17 @@ Version 2018-01-13"
         (setq cursor-type (if (or god-local-mode buffer-read-only)
                               'box
                             'bar)))
-      (god-mode-all)
       :config
       (add-hook 'god-mode-enabled-hook 'my-update-cursor)
       (add-hook 'god-mode-disabled-hook 'my-update-cursor)
       (add-to-list 'god-exempt-major-modes 'dired-mode)
       (add-to-list 'god-exempt-major-modes 'org-agenda-mode)
-      (setq god-mode-global nil)
+      (setq god-mode-global t)
       (defun god-mode-switch-buffer ()
         (interactive)
         (ivy-switch-buffer)
         (god-local-mode))
+      (god-mode-all)
       ;; I don't want to exclude special modes from god-mode
       (setq god-exempt-predicates
             (list #'god-exempt-mode-p
@@ -885,12 +930,9 @@ Version 2018-01-13"
    (quote
     ("2ad7a6de9652b0f29ced6ec4224fdc6a0c7c8b28ba032d34b37fa3586423a454" "d0f7d834242581e63a93d0231668c3571d5135debf79baa04ca8f9f5a323ed36" "f4d0d8d32b365beddf294f17b7830f96a9698a93a166542a0a2d3bbe29bb88f1" "1e7a42b56a3eeee6b466f531b7d909021641348cdb38c8838bebd383bd7d10a9" "65aa986e2e4ba6c444e904e4338eaa146d499e788079724964173b0f8f0c5b96" "6021811d1551a8415e4a9dde3c2ef57c9b2a4f93367bf25285762f4b11d29be8" "7b26aa0e97ae0756f629372d677bc30ad815c4bf21f5d2a931f21359470b18b0" "e31198977a3470364ef6bd2ed4488173656179d22179dabdc621f3c3e93edac9" "4e132458143b6bab453e812f03208075189deca7ad5954a4abb27d5afce10a9a" "155a5de9192c2f6d53efcc9c554892a0d87d87f99ad8cc14b330f4f4be204445" "b0fd04a1b4b614840073a82a53e88fe2abc3d731462d6fde4e541807825af342" "cdb3e7a8864cede434b168c9a060bf853eeb5b3f9f758310d2a2e23be41a24ae" "e3c87e869f94af65d358aa279945a3daf46f8185f1a5756ca1c90759024593dd" "34c99997eaa73d64b1aaa95caca9f0d64229871c200c5254526d0062f8074693" "d2b4a5ffd5348f6e0cd2651b349414e741a876bbd6f2e1013c4bf82939781f66" "ef4edbfc3ec509612f3cf82476beddd2aeb3da7bdc3a35726337a0cc838a4ef4" "427fa665823299f8258d8e27c80a1481edbb8f5463a6fb2665261e9076626710" "8c847a5675ece40017de93045a28ebd9ede7b843469c5dec78988717f943952a" "f5568ed375abea716d1bdfae0316d1d179f69972eaccd1f331b3e9863d7e174a" "6bc387a588201caf31151205e4e468f382ecc0b888bac98b2b525006f7cb3307" "7803ff416cf090613afd3b4c3de362e64063603522d4974bcae8cfa53cf1fd1b" "585942bb24cab2d4b2f74977ac3ba6ddbd888e3776b9d2f993c5704aa8bb4739" "b583823b9ee1573074e7cbfd63623fe844030d911e9279a7c8a5d16de7df0ed0" "5acb6002127f5d212e2d31ba2ab5503df9cd1baa1200fbb5f57cc49f6da3056d" "1436d643b98844555d56c59c74004eb158dc85fc55d2e7205f8d9b8c860e177f" "13d20048c12826c7ea636fbe513d6f24c0d43709a761052adbca052708798ce3" "2cfc1cab46c0f5bae8017d3603ea1197be4f4fff8b9750d026d19f0b9e606fae" "c3d4af771cbe0501d5a865656802788a9a0ff9cf10a7df704ec8b8ef69017c68" default)))
  '(debug-on-error t)
- '(org-agenda-files
-   (quote
-    ("e:/org-mode/inbox.org" "e:/org-mode/projects.org")))
  '(package-selected-packages
    (quote
-    (base16-theme w3 jump 0blayout telephone-line move-text jump-tree jumplist nv-delete-back hungry-delete scratch evil-mode linum-relative-mode linum-relative aggressive-indent-mode ag beacon exwm aggressive-mode agressive-indent-mode agressive-indent aggressive-indent cyberpunk-2019-theme cyberpunk-theme ahk-mode alert auto-complete avk-emacs-themes bind-key clojure-mode codesearch company-flx company-go company-irony counsel counsel-codesearch counsel-etags counsel-gtags csharp-mode elog epl espresso-theme f find-file-in-project flycheck forest-blue-theme ghub git-commit github-modern-theme go-complete go-dlv go-guru go-imports go-playground go-projectile go-rename highlight-indentation ht irony markdown-mode modern-cpp-font-lock monokai-theme org-category-capture pfuture pkg-info popup powerline diminish smooth-scrolling smooth-scroll nswbuff-mode expand-region nswbuf keyfreq shx change-inner pt doom-themes gruvbox-theme jump-char sx smartparens back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile treemacs fsharp-mode monokai ivy-yasnippet yasnippet-snippets goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets omnisharp neotree multiple-cursors moe-theme ivy-youtube ivy-hydra goto-last-change go-mode flx elpy crux counsel-spotify counsel-projectile cider bm async angular-mode ace-window)))
+    (org-mode base16-theme w3 jump 0blayout telephone-line move-text jump-tree jumplist nv-delete-back hungry-delete scratch evil-mode linum-relative-mode linum-relative aggressive-indent-mode ag beacon exwm aggressive-mode agressive-indent-mode agressive-indent aggressive-indent cyberpunk-2019-theme cyberpunk-theme ahk-mode alert auto-complete avk-emacs-themes bind-key clojure-mode codesearch company-flx company-go company-irony counsel counsel-codesearch counsel-etags counsel-gtags csharp-mode elog epl espresso-theme f find-file-in-project flycheck forest-blue-theme ghub git-commit github-modern-theme go-complete go-dlv go-guru go-imports go-playground go-projectile go-rename highlight-indentation ht irony markdown-mode modern-cpp-font-lock monokai-theme org-category-capture pfuture pkg-info popup powerline diminish smooth-scrolling smooth-scroll nswbuff-mode expand-region nswbuf keyfreq shx change-inner pt doom-themes gruvbox-theme jump-char sx smartparens back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile treemacs fsharp-mode monokai ivy-yasnippet yasnippet-snippets goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets omnisharp neotree multiple-cursors moe-theme ivy-youtube ivy-hydra goto-last-change go-mode flx elpy crux counsel-spotify counsel-projectile cider bm async angular-mode ace-window)))
  '(smooth-scroll-mode nil)
  '(smooth-scrolling-mode t)
  '(telephone-line-mode t))
@@ -906,3 +948,9 @@ Version 2018-01-13"
  ;; '(org-todo ((t (:background "snow" :foreground "#fb4933" :weight bold))))
  ;;'(which-func ((t (:foreground "light sky blue"))))
  ;;)
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
