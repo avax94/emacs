@@ -366,18 +366,12 @@ Version 2018-01-13"
 
 (use-package org
   :ensure t
-  :bind
-  (("C-c c" . org-capture)
-   ("C-c o a" . org-agenda-list)
-   ("C-c o t" . org-todo-list)
-   ("C-c o f" . org-scratch-search)
-   ("C-c o p" . org-insert-drawer)
-   ("C-c o d" . org-date)
-   ("C-c o j" . org-journal-entry)
-   ("C-c o s" . org-schedule)
-   ("C-c r"   . org-remember)
-   ("C-c a" . org-agenda))
   :config
+  (defun org-sidebar-toggle-buffers ()
+    (interactive)
+    (with-current-buffer (get-buffer "projects.org")
+      (org-sidebar-toggle)))
+
 ;; Configure reminders in appointments
   (defun toast-appt-display (min-to-app new-time msg)
     (let ((notifications-info (cond ((listp min-to-app) (mapcar* #'cons min-to-app msg))
@@ -444,7 +438,11 @@ Version 2018-01-13"
         :bind (("C-c C-r" . helm-org-rifle))))
 
   (use-package org-ql
-    :ensure t)
+    :ensure t
+    :config
+    (defun org-ql-programming (query)
+      (interactive "s")
+      (org-ql-select "E:/org-mode/programming.org" query)))
   (use-package org-bullets
     :ensure t
     :config
@@ -500,7 +498,20 @@ Version 2018-01-13"
           ))
   (advice-add 'org-agenda :around #'org-agenda-advice)
   (setq org-startup-truncated nil)
-  (setq org-archive-location (concat org-archive-file "::* From %s")))
+  (setq org-archive-location (concat org-archive-file "::* From %s"))
+  :bind
+  (("C-c c" . org-capture)
+   ("C-c o a" . org-agenda-list)
+   ("C-c o t" . org-todo-list)
+   ("C-c o f" . org-scratch-search)
+   ("C-c o p" . org-insert-drawer)
+   ("C-c o d" . org-date)
+   ("C-c o j" . org-journal-entry)
+   ("C-c o s" . org-schedule)
+   ("C-c r"   . org-remember)
+   ("C-c a" . org-agenda)
+   ("C-x C-t" . org-sidebar-toggle-buffers)))
+
 
 (use-package saveplace
   :ensure t
@@ -578,7 +589,6 @@ Version 2018-01-13"
 ;;Omnisharp is slowing me down - stop it
 (use-package omnisharp
   :init
-  :disabled
   (eval-after-load
       'company
     '(add-to-list 'company-backends 'company-omnisharp))
@@ -721,7 +731,6 @@ Version 2018-01-13"
         :bind (("C-; f" . counsel-projectile-find-file)))
       :bind (
       ("M-x" . counsel-M-x)
-      ("C-x C-b" . ivy-switch-buffer)
       ("C-x C-r" . counsel-recentf)
       ("C-x C-f" . counsel-find-file)
       ("C-c f" . counsel-describe-function)
@@ -1228,8 +1237,8 @@ Version 2018-01-13"
       (defun god-mode-switch-buffer ()
         (interactive)
         (ivy-switch-buffer)
-        (god-local-mode))
-      (god-mode-all)
+        (god-local-mode 1))
+
       ;; I don't want to exclude special modes from god-mode
       (setq god-exempt-predicates
             (list #'god-exempt-mode-p
@@ -1246,7 +1255,8 @@ Version 2018-01-13"
              ("C-x C-2" . split-window-below)
              ("C-x C-3" . split-window-right)
              ("C-x C-0" . delete-window)
-             ("C-x C-o" . other-window)))
+             ("C-x C-o" . other-window)
+             ("C-x C-b" . god-mode-switch-buffer)))
   (use-package evil
     :ensure t
     :config
@@ -1350,7 +1360,7 @@ Version 2018-01-13"
 (use-package gruvbox-theme
   :ensure t
   :config
-  (load-theme 'gruvbox t))
+  (load-theme 'doom-gruvbox t))
 
 (if (string-equal system-type "gnu/linux")
     (use-package magit
@@ -1377,11 +1387,10 @@ Version 2018-01-13"
  '(cua-mode nil nil (cua-base))
  '(custom-safe-themes
    (quote
-    ("ffe80c88e3129b2cddadaaf78263a7f896d833a77c96349052ad5b7753c0c5a5" "91375c6dc506913ac7488f655b5afe934f343a0b223021c349105d37748c6696" "c614d2423075491e6b7f38a4b7ea1c68f31764b9b815e35c9741e9490119efc0" "5b8eccff13d79fc9b26c544ee20e1b0c499587d6c4bfc38cabe34beaf2c2fc77" "4a91a64af7ff1182ed04f7453bb5a4b0c3d82148d27db699df89a5f1d449e2a4" "2ad7a6de9652b0f29ced6ec4224fdc6a0c7c8b28ba032d34b37fa3586423a454" "d0f7d834242581e63a93d0231668c3571d5135debf79baa04ca8f9f5a323ed36" "f4d0d8d32b365beddf294f17b7830f96a9698a93a166542a0a2d3bbe29bb88f1" "1e7a42b56a3eeee6b466f531b7d909021641348cdb38c8838bebd383bd7d10a9" "65aa986e2e4ba6c444e904e4338eaa146d499e788079724964173b0f8f0c5b96" "6021811d1551a8415e4a9dde3c2ef57c9b2a4f93367bf25285762f4b11d29be8" "7b26aa0e97ae0756f629372d677bc30ad815c4bf21f5d2a931f21359470b18b0" "e31198977a3470364ef6bd2ed4488173656179d22179dabdc621f3c3e93edac9" "4e132458143b6bab453e812f03208075189deca7ad5954a4abb27d5afce10a9a" "155a5de9192c2f6d53efcc9c554892a0d87d87f99ad8cc14b330f4f4be204445" "b0fd04a1b4b614840073a82a53e88fe2abc3d731462d6fde4e541807825af342" "cdb3e7a8864cede434b168c9a060bf853eeb5b3f9f758310d2a2e23be41a24ae" "e3c87e869f94af65d358aa279945a3daf46f8185f1a5756ca1c90759024593dd" "34c99997eaa73d64b1aaa95caca9f0d64229871c200c5254526d0062f8074693" "d2b4a5ffd5348f6e0cd2651b349414e741a876bbd6f2e1013c4bf82939781f66" "ef4edbfc3ec509612f3cf82476beddd2aeb3da7bdc3a35726337a0cc838a4ef4" "427fa665823299f8258d8e27c80a1481edbb8f5463a6fb2665261e9076626710" "8c847a5675ece40017de93045a28ebd9ede7b843469c5dec78988717f943952a" "f5568ed375abea716d1bdfae0316d1d179f69972eaccd1f331b3e9863d7e174a" "6bc387a588201caf31151205e4e468f382ecc0b888bac98b2b525006f7cb3307" "7803ff416cf090613afd3b4c3de362e64063603522d4974bcae8cfa53cf1fd1b" "585942bb24cab2d4b2f74977ac3ba6ddbd888e3776b9d2f993c5704aa8bb4739" "b583823b9ee1573074e7cbfd63623fe844030d911e9279a7c8a5d16de7df0ed0" "5acb6002127f5d212e2d31ba2ab5503df9cd1baa1200fbb5f57cc49f6da3056d" "1436d643b98844555d56c59c74004eb158dc85fc55d2e7205f8d9b8c860e177f" "13d20048c12826c7ea636fbe513d6f24c0d43709a761052adbca052708798ce3" "2cfc1cab46c0f5bae8017d3603ea1197be4f4fff8b9750d026d19f0b9e606fae" "c3d4af771cbe0501d5a865656802788a9a0ff9cf10a7df704ec8b8ef69017c68" default)))
- '(debug-on-error t)
+    ("b8929cff63ffc759e436b0f0575d15a8ad7658932f4b2c99415f3dde09b32e97" "f2b83b9388b1a57f6286153130ee704243870d40ae9ec931d0a1798a5a916e76" "35b0b0e531731e270708ddb342dc2e576a31fb298dcbc56a206596a43afac54f" "ffe80c88e3129b2cddadaaf78263a7f896d833a77c96349052ad5b7753c0c5a5" "91375c6dc506913ac7488f655b5afe934f343a0b223021c349105d37748c6696" "c614d2423075491e6b7f38a4b7ea1c68f31764b9b815e35c9741e9490119efc0" "5b8eccff13d79fc9b26c544ee20e1b0c499587d6c4bfc38cabe34beaf2c2fc77" "4a91a64af7ff1182ed04f7453bb5a4b0c3d82148d27db699df89a5f1d449e2a4" "2ad7a6de9652b0f29ced6ec4224fdc6a0c7c8b28ba032d34b37fa3586423a454" "d0f7d834242581e63a93d0231668c3571d5135debf79baa04ca8f9f5a323ed36" "f4d0d8d32b365beddf294f17b7830f96a9698a93a166542a0a2d3bbe29bb88f1" "1e7a42b56a3eeee6b466f531b7d909021641348cdb38c8838bebd383bd7d10a9" "65aa986e2e4ba6c444e904e4338eaa146d499e788079724964173b0f8f0c5b96" "6021811d1551a8415e4a9dde3c2ef57c9b2a4f93367bf25285762f4b11d29be8" "7b26aa0e97ae0756f629372d677bc30ad815c4bf21f5d2a931f21359470b18b0" "e31198977a3470364ef6bd2ed4488173656179d22179dabdc621f3c3e93edac9" "4e132458143b6bab453e812f03208075189deca7ad5954a4abb27d5afce10a9a" "155a5de9192c2f6d53efcc9c554892a0d87d87f99ad8cc14b330f4f4be204445" "b0fd04a1b4b614840073a82a53e88fe2abc3d731462d6fde4e541807825af342" "cdb3e7a8864cede434b168c9a060bf853eeb5b3f9f758310d2a2e23be41a24ae" "e3c87e869f94af65d358aa279945a3daf46f8185f1a5756ca1c90759024593dd" "34c99997eaa73d64b1aaa95caca9f0d64229871c200c5254526d0062f8074693" "d2b4a5ffd5348f6e0cd2651b349414e741a876bbd6f2e1013c4bf82939781f66" "ef4edbfc3ec509612f3cf82476beddd2aeb3da7bdc3a35726337a0cc838a4ef4" "427fa665823299f8258d8e27c80a1481edbb8f5463a6fb2665261e9076626710" "8c847a5675ece40017de93045a28ebd9ede7b843469c5dec78988717f943952a" "f5568ed375abea716d1bdfae0316d1d179f69972eaccd1f331b3e9863d7e174a" "6bc387a588201caf31151205e4e468f382ecc0b888bac98b2b525006f7cb3307" "7803ff416cf090613afd3b4c3de362e64063603522d4974bcae8cfa53cf1fd1b" "585942bb24cab2d4b2f74977ac3ba6ddbd888e3776b9d2f993c5704aa8bb4739" "b583823b9ee1573074e7cbfd63623fe844030d911e9279a7c8a5d16de7df0ed0" "5acb6002127f5d212e2d31ba2ab5503df9cd1baa1200fbb5f57cc49f6da3056d" "1436d643b98844555d56c59c74004eb158dc85fc55d2e7205f8d9b8c860e177f" "13d20048c12826c7ea636fbe513d6f24c0d43709a761052adbca052708798ce3" "2cfc1cab46c0f5bae8017d3603ea1197be4f4fff8b9750d026d19f0b9e606fae" "c3d4af771cbe0501d5a865656802788a9a0ff9cf10a7df704ec8b8ef69017c68" default)))
  '(package-selected-packages
    (quote
-    (ivy-rich gruvbox all-the-icons all-the-icons-dired all-the-icons-ivy org-sidebar helm-org-rifle helm-swoop org-ql org-mode base16-theme w3 jump 0blayout telephone-line move-text jump-tree jumplist nv-delete-back hungry-delete scratch evil-mode linum-relative-mode linum-relative aggressive-indent-mode ag beacon exwm aggressive-mode agressive-indent-mode agressive-indent aggressive-indent cyberpunk-2019-theme cyberpunk-theme ahk-mode alert auto-complete avk-emacs-themes bind-key clojure-mode codesearch company-flx company-go company-irony counsel counsel-codesearch counsel-etags csharp-mode elog epl espresso-theme f find-file-in-project forest-blue-theme ghub github-modern-theme go-complete go-dlv go-guru go-imports go-playground go-projectile go-rename highlight-indentation irony markdown-mode modern-cpp-font-lock monokai-theme org-category-capture pfuture pkg-info popup powerline diminish smooth-scrolling smooth-scroll nswbuff-mode expand-region nswbuf keyfreq change-inner pt doom-themes gruvbox-theme jump-char sx back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile fsharp-mode monokai ivy-yasnippet goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets neotree moe-theme ivy-youtube goto-last-change flx elpy crux counsel-spotify cider bm async angular-mode ace-window)))
+    (wrap-region omnisharp dracula-theme persp-mode ivy-rich gruvbox all-the-icons all-the-icons-dired all-the-icons-ivy org-sidebar org-ql org-mode base16-theme w3 jump 0blayout telephone-line move-text jump-tree jumplist nv-delete-back hungry-delete scratch evil-mode linum-relative-mode linum-relative aggressive-indent-mode ag beacon exwm aggressive-mode agressive-indent-mode agressive-indent aggressive-indent cyberpunk-2019-theme cyberpunk-theme ahk-mode alert auto-complete avk-emacs-themes bind-key clojure-mode codesearch company-flx company-go company-irony counsel counsel-codesearch counsel-etags csharp-mode elog epl espresso-theme f find-file-in-project forest-blue-theme ghub github-modern-theme go-complete go-dlv go-guru go-imports go-playground go-projectile go-rename highlight-indentation irony markdown-mode modern-cpp-font-lock monokai-theme org-category-capture pfuture pkg-info popup powerline diminish smooth-scrolling smooth-scroll nswbuff-mode expand-region nswbuf keyfreq change-inner pt doom-themes gruvbox-theme jump-char sx back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile fsharp-mode monokai ivy-yasnippet goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets neotree moe-theme ivy-youtube goto-last-change flx elpy crux counsel-spotify cider bm async angular-mode ace-window)))
  '(telephone-line-mode t))
 ;;
 ;;
