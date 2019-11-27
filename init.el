@@ -17,8 +17,6 @@
 ;; BEGIN
 
 ;; Windows notifications program
-(defvar use-helm nil)
-
 (defvar toast-notifier-path "E:/workspace/git/toaster/toast/bin/Release/toast.exe")
 
 (defvar ggtags-exec-path "C:/Ggtags/bin")
@@ -73,7 +71,6 @@
 
 (setenv "USER" "c:/Users/v-milast/")
 ;; END
-
 
 (setq diff-switches "-u -b -E -Z -w -B")
 
@@ -432,17 +429,14 @@ Version 2018-01-13"
         (goto-char (cdr (assoc picked-headline headlines)))
         (end-of-line))))
 
-  (if use-helm
-      (use-package helm-org-rifle
-        :ensure t
-        :bind (("C-c C-r" . helm-org-rifle))))
-
   (use-package org-ql
     :ensure t
     :config
+    (require 'org-ql-search)
     (defun org-ql-programming (query)
       (interactive "s")
-      (org-ql-select "E:/org-mode/programming.org" query)))
+      (org-ql-search "E:/org-mode/programming.org" query)))
+
   (use-package org-bullets
     :ensure t
     :config
@@ -467,6 +461,15 @@ Version 2018-01-13"
            entry
            (file+headline org-inbox-file "RandomTasks")
            "* TODO %?%i")
+          ("p"
+           "Programming snippet"
+           entry
+           (file "e:/org-mode/programming.org")
+           "* %^{Heading}
+#+BEGIN_SRC %^{Language}
+%?%i
+#+END_SRC
+")
           ("f"
            "TODO entry with file capture"
            entry
@@ -574,8 +577,8 @@ Version 2018-01-13"
 (use-package projectile
   :ensure t
   :init
-  (add-hook 'prog-mode-hook 'projectile-mode)
   :config
+  (add-hook 'prog-mode-hook 'projectile-mode)
   (setq projectile-cache-file (concat avax-temporal-directory "projectile.cache"))
   (setq projectile-known-projects-file (concat avax-temporal-directory "projectile-bookmarks.eld"))
   (setq projectile-enable-caching t)
@@ -583,12 +586,12 @@ Version 2018-01-13"
   (setq projectile-globally-ignored-directories (append `(,(regexp-quote "DS_MAIN_DEV"))
                                                         projectile-globally-ignored-directories))
   (projectile-mode 1)
-  (counsel-projectile-mode 1)
   :bind (("C-; ." . projectile-pt)))
 
 ;;Omnisharp is slowing me down - stop it
 (use-package omnisharp
   :init
+  :disabled t
   (eval-after-load
       'company
     '(add-to-list 'company-backends 'company-omnisharp))
@@ -661,52 +664,6 @@ Version 2018-01-13"
   :ensure t
   :config
   (setq recentf-max-menu-items 50))
-
-(if use-helm
-    (use-package helm
-      :ensure t
-      :diminish helm-mode
-      :init
-      (progn
-        (require 'helm-config)
-        (setq helm-candidate-number-limit 50)
-        ;; From https://gist.github.com/antifuchs/9238468
-        (setq helm-idle-delay 0.0 ; update fast sources immediately (doesn't).
-              helm-input-idle-delay 0.01  ; this actually updates things
-                                        ; reeeelatively quickly.
-              helm-yas-display-key-on-candidate t
-              helm-quick-update t
-              helm-M-x-requires-pattern nil
-              helm-ff-skip-boring-files t
-              helm-split-window-inside-p t
-              helm-window-prefer-horizontal-split t)
-        (helm-mode))
-      :config
-      (setq helm-locate-command "es %s -sort run-count %s")
-      (use-package helm-swoop
-        :ensure t
-        :config
-        (setq helm-swoop-split-with-multiple-windows nil))
-      (use-package helm-projectile
-        :ensure t
-        :config
-        (bind-keys*
-
-         ("C-c p p" . helm-projectile-switch-project))
-        :bind (("C-; f" . helm-projectile-find-file)))
-      :bind (("C-c h" . helm-mini)
-             ("C-h e" . helm-locate)
-             ("C-h a" . helm-apropos)
-             ("C-x C-b" . helm-buffers-list)
-             ("C-x b" . helm-buffers-list)
-             ("M-y" . helm-show-kill-ring)
-             ("M-x" . helm-M-x)
-             ("C-h C-o" . helm-occur)
-             ("C-h C-s" . helm-swoop)
-             ("C-x c y" . helm-yas-complete)
-             ("C-x c Y" . helm-yas-create-snippet-on-region)
-             ("C-x C-f" . helm-find-files)
-             ("C-x c SPC" . helm-all-mark-rings)))
   (use-package ivy
     :ensure t
     :diminish ivy-mode
@@ -1095,7 +1052,7 @@ Version 2018-01-13"
      'ivy-switch-buffer
      '(("j" switch-to-buffer-other-frame "other frame")
        ("k" kill-buffer "kill")
-       ("r" ivy--rename-buffer-action "rename")))))
+       ("r" ivy--rename-buffer-action "rename"))))
 
 (use-package avy
   :ensure t
@@ -1115,10 +1072,12 @@ Version 2018-01-13"
 
 (use-package multiple-cursors
   :ensure t
-  :init
+  :config
+  (use-package mc-extras
+    :ensure t)
   (defhydra mc-hydra()
     "Multiple cursors hydra"
-    ("N" mc/mark-next-lines "Mark next line")
+    ("n" mc/mark-next-lines "Mark next line")
     ("N" mc/mark-next-like-this "Mark next like this")
     ("p" mc/mark-previous-lines "Mark previous line")
     ("P" mc/mark-previous-like-this "Mark previous like this")
@@ -1165,7 +1124,7 @@ Version 2018-01-13"
   :disabled
   :ensure t)
 
-(when (and (eq window-system 'w32) (not use-helm))
+(when (and (eq window-system 'w32))
   (use-package searcheverything
     :ensure t
     :config
@@ -1210,15 +1169,10 @@ Version 2018-01-13"
   :ensure t
   :diminish yas-minor-mode
   :hook (after-init . yas-global-mode)
-  :config (use-package yasnippet-snippets
-            :ensure t))
-
-(use-package nswbuff                   ; Quick switching between buffers
-  :ensure t
-  :bind* (("<C-tab>"           . nswbuff-switch-to-next-buffer)
-          ("<C-S-iso-lefttab>" . nswbuff-switch-to-previous-buffer))
-  :config (setq nswbuff-buffer-list-function #'nswbuff-projectile-buffer-list
-                nswbuff-display-intermediate-buffers t))
+  :config
+  (use-package yasnippet-snippets
+    :ensure t)
+  (setq yas-snippet-dirs (append '("~/.emacs.d/mysnippets") yas-snippet-dirs)))
 
 (if (not use-evil)
     (use-package god-mode
@@ -1233,7 +1187,7 @@ Version 2018-01-13"
       (add-hook 'god-mode-disabled-hook 'my-update-cursor)
       (add-to-list 'god-exempt-major-modes 'dired-mode)
       (add-to-list 'god-exempt-major-modes 'org-agenda-mode)
-      (setq god-mode-global t)
+      (god-mode-all)
       (defun god-mode-switch-buffer ()
         (interactive)
         (ivy-switch-buffer)
@@ -1384,13 +1338,14 @@ Version 2018-01-13"
  ;; If there is more than one, they won't work right.
  '(ag-executable "D:/ag/ag.exe")
  '(beacon-mode t)
+ '(counsel-projectile-mode t nil (counsel-projectile))
  '(cua-mode nil nil (cua-base))
  '(custom-safe-themes
    (quote
     ("b8929cff63ffc759e436b0f0575d15a8ad7658932f4b2c99415f3dde09b32e97" "f2b83b9388b1a57f6286153130ee704243870d40ae9ec931d0a1798a5a916e76" "35b0b0e531731e270708ddb342dc2e576a31fb298dcbc56a206596a43afac54f" "ffe80c88e3129b2cddadaaf78263a7f896d833a77c96349052ad5b7753c0c5a5" "91375c6dc506913ac7488f655b5afe934f343a0b223021c349105d37748c6696" "c614d2423075491e6b7f38a4b7ea1c68f31764b9b815e35c9741e9490119efc0" "5b8eccff13d79fc9b26c544ee20e1b0c499587d6c4bfc38cabe34beaf2c2fc77" "4a91a64af7ff1182ed04f7453bb5a4b0c3d82148d27db699df89a5f1d449e2a4" "2ad7a6de9652b0f29ced6ec4224fdc6a0c7c8b28ba032d34b37fa3586423a454" "d0f7d834242581e63a93d0231668c3571d5135debf79baa04ca8f9f5a323ed36" "f4d0d8d32b365beddf294f17b7830f96a9698a93a166542a0a2d3bbe29bb88f1" "1e7a42b56a3eeee6b466f531b7d909021641348cdb38c8838bebd383bd7d10a9" "65aa986e2e4ba6c444e904e4338eaa146d499e788079724964173b0f8f0c5b96" "6021811d1551a8415e4a9dde3c2ef57c9b2a4f93367bf25285762f4b11d29be8" "7b26aa0e97ae0756f629372d677bc30ad815c4bf21f5d2a931f21359470b18b0" "e31198977a3470364ef6bd2ed4488173656179d22179dabdc621f3c3e93edac9" "4e132458143b6bab453e812f03208075189deca7ad5954a4abb27d5afce10a9a" "155a5de9192c2f6d53efcc9c554892a0d87d87f99ad8cc14b330f4f4be204445" "b0fd04a1b4b614840073a82a53e88fe2abc3d731462d6fde4e541807825af342" "cdb3e7a8864cede434b168c9a060bf853eeb5b3f9f758310d2a2e23be41a24ae" "e3c87e869f94af65d358aa279945a3daf46f8185f1a5756ca1c90759024593dd" "34c99997eaa73d64b1aaa95caca9f0d64229871c200c5254526d0062f8074693" "d2b4a5ffd5348f6e0cd2651b349414e741a876bbd6f2e1013c4bf82939781f66" "ef4edbfc3ec509612f3cf82476beddd2aeb3da7bdc3a35726337a0cc838a4ef4" "427fa665823299f8258d8e27c80a1481edbb8f5463a6fb2665261e9076626710" "8c847a5675ece40017de93045a28ebd9ede7b843469c5dec78988717f943952a" "f5568ed375abea716d1bdfae0316d1d179f69972eaccd1f331b3e9863d7e174a" "6bc387a588201caf31151205e4e468f382ecc0b888bac98b2b525006f7cb3307" "7803ff416cf090613afd3b4c3de362e64063603522d4974bcae8cfa53cf1fd1b" "585942bb24cab2d4b2f74977ac3ba6ddbd888e3776b9d2f993c5704aa8bb4739" "b583823b9ee1573074e7cbfd63623fe844030d911e9279a7c8a5d16de7df0ed0" "5acb6002127f5d212e2d31ba2ab5503df9cd1baa1200fbb5f57cc49f6da3056d" "1436d643b98844555d56c59c74004eb158dc85fc55d2e7205f8d9b8c860e177f" "13d20048c12826c7ea636fbe513d6f24c0d43709a761052adbca052708798ce3" "2cfc1cab46c0f5bae8017d3603ea1197be4f4fff8b9750d026d19f0b9e606fae" "c3d4af771cbe0501d5a865656802788a9a0ff9cf10a7df704ec8b8ef69017c68" default)))
  '(package-selected-packages
    (quote
-    (wrap-region omnisharp dracula-theme persp-mode ivy-rich gruvbox all-the-icons all-the-icons-dired all-the-icons-ivy org-sidebar org-ql org-mode base16-theme w3 jump 0blayout telephone-line move-text jump-tree jumplist nv-delete-back hungry-delete scratch evil-mode linum-relative-mode linum-relative aggressive-indent-mode ag beacon exwm aggressive-mode agressive-indent-mode agressive-indent aggressive-indent cyberpunk-2019-theme cyberpunk-theme ahk-mode alert auto-complete avk-emacs-themes bind-key clojure-mode codesearch company-flx company-go company-irony counsel counsel-codesearch counsel-etags csharp-mode elog epl espresso-theme f find-file-in-project forest-blue-theme ghub github-modern-theme go-complete go-dlv go-guru go-imports go-playground go-projectile go-rename highlight-indentation irony markdown-mode modern-cpp-font-lock monokai-theme org-category-capture pfuture pkg-info popup powerline diminish smooth-scrolling smooth-scroll nswbuff-mode expand-region nswbuf keyfreq change-inner pt doom-themes gruvbox-theme jump-char sx back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile fsharp-mode monokai ivy-yasnippet goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets neotree moe-theme ivy-youtube goto-last-change flx elpy crux counsel-spotify cider bm async angular-mode ace-window)))
+    (lsp-ui lsp-mode mc-extras eglot yasnippet yasnippet-snippets omnisharp dracula-theme persp-mode ivy-rich gruvbox all-the-icons all-the-icons-dired all-the-icons-ivy org-sidebar org-ql org-mode base16-theme w3 jump 0blayout telephone-line move-text jump-tree jumplist nv-delete-back hungry-delete scratch evil-mode linum-relative-mode linum-relative aggressive-indent-mode ag beacon exwm aggressive-mode agressive-indent-mode agressive-indent aggressive-indent cyberpunk-2019-theme cyberpunk-theme ahk-mode alert auto-complete avk-emacs-themes bind-key clojure-mode codesearch company-flx company-go company-irony counsel counsel-codesearch counsel-etags csharp-mode elog epl espresso-theme f find-file-in-project forest-blue-theme ghub github-modern-theme go-complete go-dlv go-guru go-imports go-playground go-projectile go-rename highlight-indentation irony markdown-mode modern-cpp-font-lock monokai-theme org-category-capture pfuture pkg-info popup powerline diminish smooth-scrolling smooth-scroll nswbuff-mode expand-region nswbuf keyfreq change-inner pt doom-themes gruvbox-theme jump-char sx back-button 2048-game wttrin nswbuff god-mode evil spaceline centered-cursor-mode tg treemacs-icons-dired treemacs-projectile fsharp-mode monokai ivy-yasnippet goto-chg mwim searcheverything ggtags use-package tfsmacs smex rainbow-delimiters projectile-codesearch powershell paredit org-projectile org-bullets neotree moe-theme ivy-youtube goto-last-change flx elpy crux counsel-spotify cider bm async angular-mode ace-window)))
  '(telephone-line-mode t))
 ;;
 ;;
