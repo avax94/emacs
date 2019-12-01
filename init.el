@@ -6,6 +6,9 @@
 ;; You may delete these explanatory comments.
 (package-initialize)
 (require 'package)
+(load (concat user-emacs-directory "avax-emacs/avax-config")
+      nil 'nomessage)
+
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
 ;; Added by Package.el.  This must come before configurations of
 ;; installed packages.  Don't delete this line.  If you don't want it,
@@ -13,132 +16,7 @@
 ;; You may delete these explanatory comments.
 (require 'dash)
 
-;; MODIFY -REGION
-;; BEGIN
-
-;; Windows notifications program
-(defvar toast-notifier-path "E:/workspace/git/toaster/toast/bin/Release/toast.exe")
-
-(defvar ggtags-exec-path "C:/Ggtags/bin")
-
-(defvar use-evil nil)
-
-(defvar tf-exe "C:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/Common7/IDE/CommonExtensions/Microsoft/TeamFoundation/Team Explorer/TF.exe")
-
-(defvar python-exec-path "C:/Users/v-milast/AppData/Local/Programs/Python/Python37/")
-
-(defvar everything-cli-install-dir "E:/ES-1.1.0.10/")
-
-(defvar keyfreq-file-path (if (string-equal system-type "windows-nt")
-                              "D:/.emacs.d/.emacs.keyfreq"
-                            "~/.emacs.d/.emacs.keyfreq"))
-
-(defvar avax-temporal-directory (concat user-emacs-directory "tmp/"))
-(unless (file-exists-p avax-temporal-directory)
-  (make-directory avax-temporal-directory))
-
-(defvar org-mode-scratch-file "E:/org-mode/scratch.org")
-
-(defvar org-mode-directory (if (string-equal system-type "windows-nt")
-                             "E:/org-mode"
-                             "~/org-mode"))
-
-(defvar org-archive-file (concat org-mode-directory "/archive.org"))
-
-(when (string-equal system-type "windows-nt")
-  (setenv "PATH"
-          (concat
-           "E:/bin/cygwin64/usr/local/bin" ";"
-           "E:/bin/cygwin64/usr/bin" ";"
-           "E:/bin/cygwin64/bin" ";"
-           "D:/usr/bin" ";"
-           "D:/ag/" ";"
-           "D:/pt/" ";"
-           "C:/Program Files/Git/in" ";"
-           "d:/emacs26.1686/bin" ";"
-           "C:/Users/v-milast/go/bin" ";"
-           "C:/Program Files/Java/jdk1.8.0_172/bin/" ";"
-           "C:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/MSBuild/15.0/Bin/" ";"
-           everything-cli-install-dir ";"
-           (getenv "PATH")))
-  (setq exec-path (append (list "E:/bin:/cygwin64/bin" "D:/ag/") exec-path)))
-
-(defvar omnisharp-exe-path "c:\\omnisharp\\OmniSharp.exe")
-
-;; Font size
-
-(set-face-attribute 'default (selected-frame) :height 125)
-
-(setenv "USER" "c:/Users/v-milast/")
-;; END
-
-(setq diff-switches "-u -b -E -Z -w -B")
-
-;; reduce the frequency of garbage collection by making it happen on
-;; each 50MB of allocated data (the default is on every 0.76MB)
-(setq gc-cons-threshold 50000000)
-
-(setq jit-lock-stealth-time 0.2)
-(setq jit-lock-chunk-size 500)
-(setq jit-lock-defer-time 0.2)
-(setq ido-auto-merge-work-directories-length -1)
-
-;; disable the annoying bell ring
-(setq ring-bell-function 'ignore)
-;; this variable changes syntax colorization and improves perf on large files when
-;; it is smaller
-(setq font-lock-maximum-decoration 3)
-(setq tab-width 4)
-;; nothing but buffer
-(menu-bar-mode 0)
-(tool-bar-mode 0)
-(scroll-bar-mode -1)
-;; highlight line where cursor is
-(global-hl-line-mode +1)
-(setq size-indication-mode t)
-(line-number-mode t)
-(column-number-mode t)
-(setq inhibit-startup-screen t)
-;; replace yes/no questions with y/n
-(fset 'yes-or-no-p 'y-or-n-p)
-(fringe-mode '(1 . 1))
-;; delete the previous selection when overrides it with a new insertion.
-(delete-selection-mode +1)
-;; the blinking cursor is pretty annoying, so disable it.
-(blink-cursor-mode -1)
- ;; make sure that UTF-8 is used everywhere.
-(set-terminal-coding-system  'utf-8)
-(set-keyboard-coding-system  'utf-8)
-(set-language-environment    'utf-8)
-(set-selection-coding-system 'utf-8)
-(setq locale-coding-system   'utf-8)
-(prefer-coding-system        'utf-8)
-(set-input-method nil)
-(setq-default indent-tabs-mode nil)
-;; disable auto save and backups
-(setq auto-save-default nil
-      auto-save-list-file-prefix nil
-      make-backup-files nil)
-(setq show-paren-delay 0)
-(show-paren-mode t)
-
-(add-to-list 'default-frame-alist `(font . ,(if (eq window-system 'w32)
-                                                "Lucida Console"
-                                              "Cascadia Code")  ))
-
-;; Diplay relative line numbers
-(global-display-line-numbers-mode 1)
-(setq display-line-numbers-type 'relative)
-
-(global-set-key (kbd "C-'") #'save-shortcut-to-current-buffer)
-(global-set-key (kbd "C-x C-O") 'other-frame)
-(global-set-key (kbd "C-c C-o") #'xah-show-in-desktop)
-(global-set-key (kbd "C-c C-j") #'replace-last-sexp)
-(global-set-key (kbd "C-c t c") #'avax-checkout-current-file)
-(global-set-key (kbd "C-c C-q C-s") #'format-for-in-statement)
-
-;; END
-;; CONFIG REGION
+(setq avax-machine-type 'house-win)
 
 ;; FUNCTION REGION
 ;; BEGIN
@@ -332,11 +210,6 @@ Version 2018-01-13"
     :config
     (add-hook 'dired-mode-hook (lambda () (all-the-icons-dired-mode 1)))))
 
-(use-package tfsmacs
-  :ensure t
-  :config
-  (setq tfsmacs-cmd "C:/HomeFolder/TEE-CLC-14.134.0/tf.cmd"))
-
 (use-package nv-delete-back
   :ensure t
   :bind (([remap backward-kill-word] . nv-delete-back-word)))
@@ -358,57 +231,59 @@ Version 2018-01-13"
 (use-package elpy
   :ensure t
   :config
-  (setq exec-path (append (list python-exec-path) exec-path))
+  (setq exec-path (append (list avax-python-exec-path) exec-path))
   (elpy-enable))
 
 (use-package org
   :ensure t
   :config
+  (setq org-directory avax-org-mode-directory)
+
   (defun org-sidebar-toggle-buffers ()
     (interactive)
     (with-current-buffer (get-buffer "projects.org")
       (org-sidebar-toggle)))
 
-;; Configure reminders in appointments
-  (defun toast-appt-display (min-to-app new-time msg)
-    (let ((notifications-info (cond ((listp min-to-app) (mapcar* #'cons min-to-app msg))
-                                    ((listp msg) (mapcar (lambda (x) (cons min-to-app x)) msg))
-                                    (t (list (cons min-to-app msg))))))
-      (loop for notification in notifications-info do
-            (toast-appt-send-notification
-             (format "Appointment in %s minutes" (car notification))    ;; passed to -t in toast call
-             (format "%s" (cdr notification))))))
+  (if avax-toast-notifier-path
+      ;; Configure reminders in appointments
+      (defun toast-appt-display (min-to-app new-time msg)
+        (let ((notifications-info (cond ((listp min-to-app) (mapcar* #'cons min-to-app msg))
+                                        ((listp msg) (mapcar (lambda (x) (cons min-to-app x)) msg))
+                                        (t (list (cons min-to-app msg))))))
+          (loop for notification in notifications-info do
+                (toast-appt-send-notification
+                 (format "Appointment in %s minutes" (car notification))    ;; passed to -t in toast call
+                 (format "%s" (cdr notification))))))
 
-  (require 'appt)
-  (setq diary-file (concat org-mode-directory "/journal.appt"))
-  (setq appt-time-msg-list nil)    ;; clear existing appt list
-  (setq appt-display-interval '5)  ;; warn every 5 minutes from t - appt-message-warning-time
-  (setq
-   appt-message-warning-time '15  ;; send first warning 15 minutes before appointment
-   appt-display-mode-line nil     ;; don't show in the modeline
-   appt-display-format 'window)   ;; pass warnings to the designated window function
-  (appt-activate 1)                ;; activate appointment notification
-  (display-time)                   ;; activate time display
-  (org-agenda-to-appt)             ;; generate the appt list from org agenda files on emacs launch
-  (run-at-time "24:01" 900 'org-agenda-to-appt)           ;; update appt every 15mins
+    (require 'appt)
+    (setq diary-file (concat org-directory "/journal.appt"))
+    (setq appt-time-msg-list nil)    ;; clear existing appt list
+    (setq appt-display-interval '5)  ;; warn every 5 minutes from t - appt-message-warning-time
+    (setq
+     appt-message-warning-time '15  ;; send first warning 15 minutes before appointment
+     appt-display-mode-line nil     ;; don't show in the modeline
+     appt-display-format 'window)   ;; pass warnings to the designated window function
+    (appt-activate 1)                ;; activate appointment notification
+    (display-time)                   ;; activate time display
+    (org-agenda-to-appt)             ;; generate the appt list from org agenda files on emacs launch
+    (run-at-time "24:01" 900 'org-agenda-to-appt)           ;; update appt every 15mins
 
-  (add-hook 'org-capture-after-finalize-hook 'org-agenda-to-appt)
+    (add-hook 'org-capture-after-finalize-hook 'org-agenda-to-appt)
 
-  ;; set up the call to the notifier
-  (defun toast-appt-send-notification (title msg)
-    (shell-command (concat toast-notifier-path
-                           " -t \"" title "\""
-                           " -m \"" msg "\""
-                           " -p ~/.emacs.d/resources/org.png")))
+    ;; set up the call to the notifier
+    (defun toast-appt-send-notification (title msg)
+      (shell-command (concat avax-toast-notifier-path
+                             " -t \"" title "\""
+                             " -m \"" msg "\""
+                             " -p ~/.emacs.d/resources/org.png")))
 
-  (setq appt-disp-window-function (function toast-appt-display))
-
-  ;; Done configuring
+    (setq appt-disp-window-function (function toast-appt-display)))
 
   (defun org-scratch-search ()
     (interactive)
     (let* ((org-agenda-files (list org-mode-scratch-file)))
       (org-tags-view)))
+
   (defun org-get-non-todo-headlines (org-file)
     "Gets all non-todo headlines"
     (with-current-buffer (find-file-noselect org-file)
@@ -419,6 +294,7 @@ Version 2018-01-13"
                                                        "&")))
         (org-map-entries (lambda () (cons (nth 4 (org-heading-components)) (point)))
                          todo-keywords-exclude-match))))
+
   (defun org-capture-non-todo-headlines-function (org-file)
     "Capturing interactive function that let's you pick non-todo headline to place your capture under"
     (interactive)
@@ -435,23 +311,28 @@ Version 2018-01-13"
     (require 'org-ql-search)
     (defun org-ql-programming (query)
       (interactive "s")
-      (org-ql-search "E:/org-mode/programming.org" query)))
+      (org-ql-search avax-org-mode-directory query)))
 
   (use-package org-bullets
     :ensure t
     :config
     (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
   (use-package org-protocol)
-  (setq org-directory org-mode-directory)
-  (setq org-agenda-files `(,(concat org-directory "/projects.org")
-                           ,(concat org-directory "/inbox.org")
-                           ,(concat org-directory "/journal.org")))
-  (setq org-main-agenda-file (concat org-directory "/projects.org"))
-  (setq org-inbox-file (concat org-directory "/inbox.org"))
+  (setq avax-org-mode-scratch-file (concat org-directory "/scratch.org"))
+  (setq avax-org-projects-file (concat org-directory "/projects.org"))
+  (setq avax-org-connect-file (concat org-directory "/connect-period.org"))
+  (setq avax-org-programming-file (concat org-directory "/programming.org"))
+  (setq avax-org-inbox-file (concat org-directory "/inbox.org"))
+  (setq avax-org-someday-file (concat org-directory "/someday.org"))
+  (setq avax-org-journal-file (concat org-directory "/journal.org"))
+  (setq org-agenda-files (list avax-org-projects-file
+                               avax-org-inbox-file
+                               avax-org-journal-file))
+  (setq org-main-agenda-file avax-org-projects-file)
   (setq org-journal-file (concat org-directory "/journal.org"))
-  (setq org-refile-targets '(("E:/org-mode/connect-period.org" :maxlevel . 1)
-                             ("E:/org-mode/inbox.org" :maxlevel . 1)
-                             ("E:/org-mode/someday.org" :maxlevel . 1)
+  (setq org-refile-targets '((avax-org-connect-file :maxlevel . 1)
+                             (avax-org-inbox-file :maxlevel . 1)
+                             (avax-org-someday-file :maxlevel . 1)
                              (org-agenda-files :tag . "TASKGROUP")))
   (setq org-agenda-hide-tags-regexp "TASKGROUP")
   (setq org-default-notes-file (concat org-directory "/notes.org"))
@@ -459,12 +340,12 @@ Version 2018-01-13"
         '(("t"
            "TODO entry without file capture"
            entry
-           (file+headline org-inbox-file "RandomTasks")
+           (file+headline avax-org-inbox-file "RandomTasks")
            "* TODO %?%i")
           ("p"
            "Programming snippet"
            entry
-           (file "e:/org-mode/programming.org")
+           (file avax-org-programming-file)
            "* %^{Heading}
 #+BEGIN_SRC %^{Language}
 %?%i
@@ -473,12 +354,12 @@ Version 2018-01-13"
           ("f"
            "TODO entry with file capture"
            entry
-           (file+headline org-inbox-file "RandomTasks")
+           (file+headline avax-org-inbox-file "RandomTasks")
            "* TODO %?%i \n%a")
           ("l"
            "TODO entry under selected headline + file"
            entry
-           (file+function  org-inbox-file (lambda () (org-capture-non-todo-headlines-function org-main-agenda-file)))
+           (file+function  avax-org-inbox-file (lambda () (org-capture-non-todo-headlines-function org-main-agenda-file)))
            "* TODO %i \n%a")
           ("h"
            "TODO entry under selected headline"
@@ -488,12 +369,12 @@ Version 2018-01-13"
           ("n"
            "Scratchpad"
            entry
-           (file+datetree org-mode-scratch-file)
+           (file+datetree avax-org-mode-scratch-file)
            "* %^{Description} %^g\n%T\n%i%?")
           ("F"
            "Scratchpad with file"
            entry
-           (file+datetree org-mode-scratch-file)
+           (file+datetree avax-org-mode-scratch-file)
            "* %^{Description} %^g\n%T\n%a\n%i%?")
           ("r" "Reminder" entry
            (file+olp+datetree org-journal-file)
@@ -561,6 +442,7 @@ Version 2018-01-13"
     (add-hook hook 'whitespace-mode)
     (add-hook 'before-save-hook 'whitespace-cleanup))
   :config
+  (set-face-attribute 'whitespace-space nil :background nil :foreground "gray30")
   (setq whitespace-line-column 150)
   (setq whitespace-style '(whitespace tab-mark space-mark empty trailing)))
 
@@ -1124,17 +1006,17 @@ Version 2018-01-13"
   :disabled
   :ensure t)
 
-(when (and (eq window-system 'w32))
-  (use-package searcheverything
-    :ensure t
-    :config
-    (defun searcheverything-thing-at-point ()
-      (interactive)
-      (let ((thingatpoint (thing-at-point 'filename)))
-        (searcheverything-execute-query thingatpoint)))
-    (setq searcheverything-cli-path (concat everything-cli-install-dir "es.exe"))
-    :bind (("C-h e" . searcheverything-execute-query)
-           ("C-h t" . searcheverything-thing-at-point))))
+(use-package searcheverything
+  :if avax-everything-cli-install-dir
+  :ensure t
+  :config
+  (defun searcheverything-thing-at-point ()
+    (interactive)
+    (let ((thingatpoint (thing-at-point 'filename)))
+      (searcheverything-execute-query thingatpoint)))
+  (setq searcheverything-cli-path (concat avax-everything-cli-install-dir "es.exe"))
+  :bind (("C-h e" . searcheverything-execute-query)
+	 ("C-h t" . searcheverything-thing-at-point)))
 
 ;; Move to the beginning/end of line or code
 (use-package mwim
@@ -1174,7 +1056,7 @@ Version 2018-01-13"
     :ensure t)
   (setq yas-snippet-dirs (append '("~/.emacs.d/mysnippets") yas-snippet-dirs)))
 
-(if (not use-evil)
+(if (not avax-use-evil)
     (use-package god-mode
       :ensure t
       :init
@@ -1271,7 +1153,7 @@ Version 2018-01-13"
 (use-package keyfreq
   :ensure t
   :config
-  (setq keyfreq-file keyfreq-file-path)
+  (setq keyfreq-file avax-keyfreq-file-path)
   (keyfreq-mode 1)
   (keyfreq-autosave-mode 1))
 
@@ -1316,9 +1198,8 @@ Version 2018-01-13"
   :config
   (load-theme 'doom-one t))
 
-(if (string-equal system-type "gnu/linux")
-    (use-package magit
-      :ensure t))
+(use-package magit
+  :ensure t)
 
 (use-package solaire-mode
   :init
@@ -1405,4 +1286,4 @@ Version 2018-01-13"
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(which-func ((t (:foreground "green" :weight bold)))))
+ '(whitespace-space ((t (:foreground "gray60")))))
