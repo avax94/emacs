@@ -6,8 +6,6 @@
              house-linux
              house-laptop))
 
-(setq avax-machine-type 'house-laptop)
-
 ;; Windows notifications program
 (defvar avax-toast-notifier-path
   (cond ((eq avax-machine-type 'house-win) nil)

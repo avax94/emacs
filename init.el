@@ -6,18 +6,22 @@
 ;; You may delete these explanatory comments.
 (package-initialize)
 (require 'package)
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
+
+(load (concat user-emacs-directory "avax-emacs/avax-machine-definition")
+      nil 'nomessage)
 (load (concat user-emacs-directory "avax-emacs/avax-config")
       nil 'nomessage)
+(load (concat user-emacs-directory "avax-emacs/avax-programming")
+      nil 'nomessage)
+(load (concat user-emacs-directory "avax-emacs/avax-ui")
+      nil 'nomessage)
 
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
 ;; Added by Package.el.  This must come before configurations of
 ;; installed packages.  Don't delete this line.  If you don't want it,
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.
 (require 'dash)
-
-(setq avax-machine-type 'house-win)
-
 ;; FUNCTION REGION
 ;; BEGIN
 
@@ -228,12 +232,6 @@ Version 2018-01-13"
          ("C-c e" . crux-eval-and-replace)
          ("C-c I" . crux-find-user-init-file)))
 
-(use-package elpy
-  :ensure t
-  :config
-  (setq exec-path (append (list avax-python-exec-path) exec-path))
-  (elpy-enable))
-
 (use-package org
   :ensure t
   :config
@@ -396,7 +394,6 @@ Version 2018-01-13"
    ("C-c a" . org-agenda)
    ("C-x C-t" . org-sidebar-toggle-buffers)))
 
-
 (use-package saveplace
   :ensure t
   :config
@@ -404,122 +401,11 @@ Version 2018-01-13"
     (setq save-place-file (concat avax-temporal-directory "saveplace.el"))
     (setq-default save-place t)))
 
-(use-package telephone-line
-  :ensure t
-  :config
-  (telephone-line-mode t))
-
 (use-package async
   :defer t
   :ensure t
   :config
   (setq async-bytecomp-package-mode 1))
-
-;; pip install pygments is needed for better experience
-;; steps to repro install cygwin64 and build gtags as per tutorial
-;; https://github.com/leoliu/ggtags - we will only need config file from here
-(use-package ggtags
-  :ensure t
-  :init
-  :config
-  (unbind-key "M-<" ggtags-navigation-map)
-  (unbind-key "M->" ggtags-navigation-map)
-  (setq ggtags-executable-directory ggtags-exec-path)
-  (add-hook 'c-mode-common-hook
-            (lambda ()
-              (when (derived-mode-p 'csharp-mode 'c-mode 'c++-mode 'java-mode)
-                (ggtags-mode))))
-  :bind (("M-;" . ggtags-find-tag-dwim)
-         ("M-]" . ggtags-find-reference)
-         ("C-c g t" . ggtags-find-tag-dwim)
-         ("C-c g r" . ggtags-find-reference)))
-
-(use-package whitespace
-  :ensure t
-  :init
-  (dolist
-      (hook '(prog-mode-hook text-mode-hook))
-    (add-hook hook 'whitespace-mode)
-    (add-hook 'before-save-hook 'whitespace-cleanup))
-  :config
-  (set-face-attribute 'whitespace-space nil :background nil :foreground "gray30")
-  (setq whitespace-line-column 150)
-  (setq whitespace-style '(whitespace tab-mark space-mark empty trailing)))
-
-(use-package codesearch
-  :ensure t
-  :config
-  (setq codesearch-global-csearchindex nil)
-  (setq codesearch-output-buffer "*codesearch*")
-  (setq codesearch-csearch (concat (getenv "USER") "/go/bin/csearch.exe"))
-  (setq codesearch-cindex (concat (getenv "USER") "/go/bin/cindex.exe"))
-  (setq codesearch-csearchindex "CSearchTags")
-  :bind (("M-[" . listing-codesearch-search)))
-
-(use-package projectile
-  :ensure t
-  :init
-  (add-hook 'prog-mode-hook 'projectile-mode)
-  :config
-  (setq projectile-cache-file (concat avax-temporal-directory "projectile.cache"))
-  (setq projectile-known-projects-file (concat avax-temporal-directory "projectile-bookmarks.eld"))
-  (setq projectile-enable-caching t)
-  (setq projectile-indexing-method 'alien)
-  (setq projectile-globally-ignored-directories (append `(,(regexp-quote "DS_MAIN_DEV"))
-                                                        projectile-globally-ignored-directories))
-  (projectile-mode 1)
-  :bind (("C-; ." . projectile-pt)))
-
-;;Omnisharp is slowing me down - stop it
-(use-package omnisharp
-  :init
-  :disabled t
-  (eval-after-load
-      'company
-    '(add-to-list 'company-backends 'company-omnisharp))
-  :diminish omnisharp-mode
-  :config
-
-  (defun my-csharp-mode-setup ()
-    (omnisharp-mode)
-    (company-mode)
-    (flycheck-mode)
-    (setq indent-tabs-mode nil)
-    (setq c-syntactic-indentation t)
-    (c-set-style "ellemtel")
-    (setq c-basic-offset 4)
-    (setq truncate-lines t)
-    (setq tab-width 4)
-    (setq company-idle-delay 0.5)
-    (setq evil-shift-width 4)
-    (setq flycheck-idle-change-delay 1.0)
-    (local-set-key (kbd "C-c r r") 'omnisharp-run-code-action-refactoring)
-    (local-set-key (kbd "C-c C-c") 'recompile)
-    (local-set-key (kbd "M-.") 'omnisharp-go-to-definition)
-    (local-set-key (kbd "M-;") 'omnisharp-find-usages))
-  (add-hook 'csharp-mode-hook #'my-csharp-mode-setup t)
-  (setq omnisharp-server-executable-path omnisharp-exe-path))
-
-(use-package paredit
-  :ensure t
-  :diminish paredit-mode
-  :init
-  (add-hook 'clojure-mode-hook 'enable-paredit-mode)
-  (add-hook 'cider-repl-mode-hook 'enable-paredit-mode)
-  (add-hook 'lisp-mode-hook 'enable-paredit-mode)
-  (add-hook 'emacs-lisp-mode-hook 'enable-paredit-mode)
-  (add-hook 'lisp-interaction-mode-hook 'enable-paredit-mode)
-  (add-hook 'ielm-mode-hook 'enable-paredit-mode)
-  (add-hook 'json-mode-hook 'enable-paredit-mode))
-
-(use-package csharp-mode
-  ;; only use this in windows
-  :if (string-equal system-type "windows-nt")
-  :ensure t
-  :diminish csharp-mode
-  :config
-  (setq auto-mode-alist (append '(("\\.cs$" . csharp-mode))
-                                auto-mode-alist)))
 
 (use-package treemacs
   :ensure t
@@ -546,395 +432,395 @@ Version 2018-01-13"
   :ensure t
   :config
   (setq recentf-max-menu-items 50))
-  (use-package ivy
+(use-package ivy
+  :ensure t
+  :diminish ivy-mode
+  :bind
+  (:map ivy-minibuffer-map
+        ("C-o" . hydra-ivy/body))
+  :config
+  (use-package swiper
+    :ensure t)
+  (use-package counsel
     :ensure t
-    :diminish ivy-mode
-    :bind
-    (:map ivy-minibuffer-map
-          ("C-o" . hydra-ivy/body))
     :config
-    (use-package swiper
-      :ensure t)
-    (use-package counsel
+    (add-to-list 'ivy-initial-inputs-alist '(counsel-M-x . ""))
+    (add-to-list 'ivy-initial-inputs-alist '(org-capture-refile . ""))
+    (add-to-list 'ivy-initial-inputs-alist '(org-refile . ""))
+    (add-to-list 'ivy-initial-inputs-alist '(counsel-org-capture . ""))
+    (use-package counsel-projectile
       :ensure t
       :config
-      (add-to-list 'ivy-initial-inputs-alist '(counsel-M-x . ""))
-      (add-to-list 'ivy-initial-inputs-alist '(org-capture-refile . ""))
-      (add-to-list 'ivy-initial-inputs-alist '(org-refile . ""))
-      (add-to-list 'ivy-initial-inputs-alist '(counsel-org-capture . ""))
-      (use-package counsel-projectile
-        :ensure t
-        :config
-        (bind-keys*
-         ("C-c p p" . counsel-projectile-switch-project))
-        :bind (("C-; f" . counsel-projectile-find-file)))
-      :bind (
-      ("M-x" . counsel-M-x)
-      ("C-x C-r" . counsel-recentf)
-      ("C-x C-f" . counsel-find-file)
-      ("C-c f" . counsel-describe-function)
-      ("C-c v" . counsel-describe-variable)
-      ("C-c k" . counsel-pt)
-      ("C-s" . swiper)
-      ("C-r" . swiper)
-      ("C-M-s" . swiper-all)
+      (bind-keys*
+       ("C-c p p" . counsel-projectile-switch-project))
+      :bind (("C-; f" . counsel-projectile-find-file)))
+    :bind (
+           ("M-x" . counsel-M-x)
+           ("C-x C-r" . counsel-recentf)
+           ("C-x C-f" . counsel-find-file)
+           ("C-c f" . counsel-describe-function)
+           ("C-c v" . counsel-describe-variable)
+           ("C-c k" . counsel-pt)
+           ("C-s" . swiper)
+           ("C-r" . swiper)
+           ("C-M-s" . swiper-all)
 
-      :map ivy-minibuffer-map
-      ("C-w" . ivy-yank-word)
+           :map ivy-minibuffer-map
+           ("C-w" . ivy-yank-word)
 
-      :map counsel-find-file-map
-      ("C-h" . counsel-up-directory)
+           :map counsel-find-file-map
+           ("C-h" . counsel-up-directory)
 
-      :map swiper-map
-      ("M-s" . swiper-isearch-toggle)
-      ("M-%" . swiper-query-replace)
+           :map swiper-map
+           ("M-s" . swiper-isearch-toggle)
+           ("M-%" . swiper-query-replace)
 
-      :map isearch-mode-map
-      ("M-s" . swiper-isearch-toggle))
-      :hook ((after-init . ivy-mode)
-             (ivy-mode . counsel-mode))
-      :init
-      (setq enable-recursive-minibuffers t) ; Allow commands in minibuffers
+           :map isearch-mode-map
+           ("M-s" . swiper-isearch-toggle))
+    :hook ((after-init . ivy-mode)
+           (ivy-mode . counsel-mode))
+    :init
+    (setq enable-recursive-minibuffers t) ; Allow commands in minibuffers
 
-      (setq ivy-use-selectable-prompt t
-            ivy-use-virtual-buffers t    ; Enable bookmarks and recentf
-            ivy-height 10
-            ivy-on-del-error-function nil
-            ivy-initial-inputs-alist nil)
-      (defun my-ivy-format-function-arrow (cands)
-        "Transform CANDS into a string for minibuffer."
-        (ivy--format-function-generic
-         (lambda (str)
-           (concat (if (display-graphic-p)
-                       (all-the-icons-octicon "chevron-right" :height 0.8 :v-adjust -0.05)
-                     ">")
-                   (propertize " " 'display `(space :align-to 2))
-                   (ivy--add-face str 'ivy-current-match)))
-         (lambda (str)
-           (concat (propertize " " 'display `(space :align-to 2)) str))
-         cands
-         "\n"))
-      (setq ivy-format-functions-alist '((counsel-describe-face . counsel--faces-format-function)
-                                         (t . my-ivy-format-function-arrow))))
+    (setq ivy-use-selectable-prompt t
+          ivy-use-virtual-buffers t    ; Enable bookmarks and recentf
+          ivy-height 10
+          ivy-on-del-error-function nil
+          ivy-initial-inputs-alist nil)
+    (defun my-ivy-format-function-arrow (cands)
+      "Transform CANDS into a string for minibuffer."
+      (ivy--format-function-generic
+       (lambda (str)
+         (concat (if (display-graphic-p)
+                     (all-the-icons-octicon "chevron-right" :height 0.8 :v-adjust -0.05)
+                   ">")
+                 (propertize " " 'display `(space :align-to 2))
+                 (ivy--add-face str 'ivy-current-match)))
+       (lambda (str)
+         (concat (propertize " " 'display `(space :align-to 2)) str))
+       cands
+       "\n"))
+    (setq ivy-format-functions-alist '((counsel-describe-face . counsel--faces-format-function)
+                                       (t . my-ivy-format-function-arrow))))
 
-    ;; More friendly display transformer for Ivy
-    (use-package ivy-rich
-      :ensure t
-      :defines (all-the-icons-icon-alist
-                all-the-icons-dir-icon-alist
-                bookmark-alist)
-      :functions (all-the-icons-icon-for-file
-                  all-the-icons-icon-for-mode
-                  all-the-icons-icon-family
-                  all-the-icons-faicon
-                  all-the-icons-octicon
-                  all-the-icons-material
-                  all-the-icons-match-to-alist
-                  all-the-icons-auto-mode-match?
-                  all-the-icons-dir-is-submodule
-                  my-ivy-rich-bookmark-type)
-      :commands (ivy-rich-bookmark-filename
-                 ivy-rich-bookmark-type)
-      :preface
-      (defun ivy-rich-bookmark-name (candidate)
-        (car (assoc candidate bookmark-alist)))
+  ;; More friendly display transformer for Ivy
+  (use-package ivy-rich
+    :ensure t
+    :defines (all-the-icons-icon-alist
+              all-the-icons-dir-icon-alist
+              bookmark-alist)
+    :functions (all-the-icons-icon-for-file
+                all-the-icons-icon-for-mode
+                all-the-icons-icon-family
+                all-the-icons-faicon
+                all-the-icons-octicon
+                all-the-icons-material
+                all-the-icons-match-to-alist
+                all-the-icons-auto-mode-match?
+                all-the-icons-dir-is-submodule
+                my-ivy-rich-bookmark-type)
+    :commands (ivy-rich-bookmark-filename
+               ivy-rich-bookmark-type)
+    :preface
+    (defun ivy-rich-bookmark-name (candidate)
+      (car (assoc candidate bookmark-alist)))
 
-      (defun ivy-rich-buffer-icon (candidate)
-        "Display buffer icons in `ivy-rich'."
-        (when (display-graphic-p)
-          (let* ((buffer (get-buffer candidate))
-                 (buffer-file-name (buffer-file-name buffer))
-                 (major-mode (buffer-local-value 'major-mode buffer))
-                 (icon (if (and buffer-file-name
-                                (all-the-icons-auto-mode-match?))
-                           (all-the-icons-icon-for-file (file-name-nondirectory buffer-file-name) :v-adjust -0.05)
-                         (all-the-icons-icon-for-mode major-mode :v-adjust -0.05))))
-            (if (symbolp icon)
-                (all-the-icons-faicon "file-o" :face 'all-the-icons-dsilver :height 0.8 :v-adjust 0.0)
-              icon))))
-
-      (defun ivy-rich-file-icon (candidate)
-        "Display file icons in `ivy-rich'."
-        (when (display-graphic-p)
-          (let* ((path (file-local-name (concat ivy--directory candidate)))
-                 (file (file-name-nondirectory path))
-                 (icon (cond
-                        ((file-directory-p path)
-                         (cond
-                          ((and (fboundp 'tramp-tramp-file-p)
-                                (tramp-tramp-file-p default-directory))
-                           (all-the-icons-octicon "file-directory" :height 1.0 :v-adjust 0.01))
-                          ((file-symlink-p path)
-                           (all-the-icons-octicon "file-symlink-directory" :height 1.0 :v-adjust 0.01))
-                          ((all-the-icons-dir-is-submodule path)
-                           (all-the-icons-octicon "file-submodule" :height 1.0 :v-adjust 0.01))
-                          ((file-exists-p (format "%s/.git" path))
-                           (all-the-icons-octicon "repo" :height 1.1 :v-adjust 0.01))
-                          (t (let ((matcher (all-the-icons-match-to-alist path all-the-icons-dir-icon-alist)))
-                               (apply (car matcher) (list (cadr matcher) :v-adjust 0.01))))))
-                        ((string-match "^/.*:$" path)
-                         (all-the-icons-material "settings_remote" :height 1.0 :v-adjust -0.2))
-                        ((not (string-empty-p file))
-                         (all-the-icons-icon-for-file file :v-adjust -0.05)))))
-            (if (symbolp icon)
-                (all-the-icons-faicon "file-o" :face 'all-the-icons-dsilver :height 0.8 :v-adjust 0.0)
-              icon))))
-
-      (defun ivy-rich-dir-icon (_candidate)
-        "Display directory icons in `ivy-rich'."
-        (when (display-graphic-p)
-          (all-the-icons-octicon "file-directory" :height 1.0 :v-adjust 0.01)))
-
-      (defun ivy-rich-function-icon (_candidate)
-        "Display function icons in `ivy-rich'."
-        (when (display-graphic-p)
-          (all-the-icons-faicon "cube" :height 0.9 :v-adjust -0.05 :face 'all-the-icons-purple)))
-
-      (defun ivy-rich-variable-icon (_candidate)
-        "Display variable icons in `ivy-rich'."
-        (when (display-graphic-p)
-          (all-the-icons-octicon "tag" :height 0.9 :v-adjust 0 :face 'all-the-icons-lblue)))
-
-      (defun ivy-rich-symbol-icon (_candidate)
-        "Display symbol icons in `ivy-rich'."
-        (when (display-graphic-p)
-          (all-the-icons-octicon "gear" :height 0.9 :v-adjust -0.05)))
-
-      (defun ivy-rich-theme-icon (_candidate)
-        "Display theme icons in `ivy-rich'."
-        (when (display-graphic-p)
-          (all-the-icons-material "palette" :height 1.0 :v-adjust -0.2 :face 'all-the-icons-lblue)))
-
-      (defun ivy-rich-keybinding-icon (_candidate)
-        "Display keybindings icons in `ivy-rich'."
-        (when (display-graphic-p)
-          (all-the-icons-material "keyboard" :height 1.0 :v-adjust -0.2)))
-
-      (defun ivy-rich-library-icon (_candidate)
-        "Display library icons in `ivy-rich'."
-        (when (display-graphic-p)
-          (all-the-icons-material "view_module" :height 1.0 :v-adjust -0.2 :face 'all-the-icons-lblue)))
-
-      (defun ivy-rich-package-icon (_candidate)
-        "Display package icons in `ivy-rich'."
-        (when (display-graphic-p)
-          (all-the-icons-faicon "archive" :height 0.9 :v-adjust 0.0 :face 'all-the-icons-silver)))
-
+    (defun ivy-rich-buffer-icon (candidate)
+      "Display buffer icons in `ivy-rich'."
       (when (display-graphic-p)
-        (defun my-ivy-rich-bookmark-type (candidate)
-          (let ((filename (file-local-name (ivy-rich-bookmark-filename candidate))))
-            (cond ((null filename)
-                   (all-the-icons-material "block" :v-adjust -0.2 :face 'warning))  ; fixed #38
-                  ((file-remote-p filename)
-                   (all-the-icons-material "wifi_tethering" :v-adjust -0.2 :face 'mode-line-buffer-id))
-                  ((not (file-exists-p filename))
-                   (all-the-icons-material "block" :v-adjust -0.2 :face 'error))
-                  ((file-directory-p filename)
-                   (all-the-icons-octicon "file-directory" :height 0.9 :v-adjust -0.05))
-                  (t (all-the-icons-icon-for-file (file-name-nondirectory filename) :height 0.9 :v-adjust -0.05)))))
-        (advice-add #'ivy-rich-bookmark-type :override #'my-ivy-rich-bookmark-type))
-      :hook ((ivy-mode . ivy-rich-mode)
-             (ivy-rich-mode . (lambda ()
-                                (setq ivy-virtual-abbreviate
-                                      (or (and ivy-rich-mode 'abbreviate) 'name)))))
-      :init
-      ;; For better performance
-      (setq ivy-rich-parse-remote-buffer nil)
+        (let* ((buffer (get-buffer candidate))
+               (buffer-file-name (buffer-file-name buffer))
+               (major-mode (buffer-local-value 'major-mode buffer))
+               (icon (if (and buffer-file-name
+                              (all-the-icons-auto-mode-match?))
+                         (all-the-icons-icon-for-file (file-name-nondirectory buffer-file-name) :v-adjust -0.05)
+                       (all-the-icons-icon-for-mode major-mode :v-adjust -0.05))))
+          (if (symbolp icon)
+              (all-the-icons-faicon "file-o" :face 'all-the-icons-dsilver :height 0.8 :v-adjust 0.0)
+            icon))))
 
-      ;; Setting tab size to 1, to insert tabs as delimiters
-      (add-hook 'minibuffer-setup-hook
-                (lambda ()
-                  (setq tab-width 1)))
+    (defun ivy-rich-file-icon (candidate)
+      "Display file icons in `ivy-rich'."
+      (when (display-graphic-p)
+        (let* ((path (file-local-name (concat ivy--directory candidate)))
+               (file (file-name-nondirectory path))
+               (icon (cond
+                      ((file-directory-p path)
+                       (cond
+                        ((and (fboundp 'tramp-tramp-file-p)
+                              (tramp-tramp-file-p default-directory))
+                         (all-the-icons-octicon "file-directory" :height 1.0 :v-adjust 0.01))
+                        ((file-symlink-p path)
+                         (all-the-icons-octicon "file-symlink-directory" :height 1.0 :v-adjust 0.01))
+                        ((all-the-icons-dir-is-submodule path)
+                         (all-the-icons-octicon "file-submodule" :height 1.0 :v-adjust 0.01))
+                        ((file-exists-p (format "%s/.git" path))
+                         (all-the-icons-octicon "repo" :height 1.1 :v-adjust 0.01))
+                        (t (let ((matcher (all-the-icons-match-to-alist path all-the-icons-dir-icon-alist)))
+                             (apply (car matcher) (list (cadr matcher) :v-adjust 0.01))))))
+                      ((string-match "^/.*:$" path)
+                       (all-the-icons-material "settings_remote" :height 1.0 :v-adjust -0.2))
+                      ((not (string-empty-p file))
+                       (all-the-icons-icon-for-file file :v-adjust -0.05)))))
+          (if (symbolp icon)
+              (all-the-icons-faicon "file-o" :face 'all-the-icons-dsilver :height 0.8 :v-adjust 0.0)
+            icon))))
 
-      (setq ivy-rich-display-transformers-list
-            '(ivy-switch-buffer
-              (:columns
-               ((ivy-rich-buffer-icon)
-                (ivy-rich-candidate (:width 30))
-                (ivy-rich-switch-buffer-size (:width 7))
-                (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
-                (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
-                (ivy-rich-switch-buffer-project (:width 15 :face success))
-                (ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))
-               :predicate
-               (lambda (cand) (get-buffer cand))
-               :delimiter "\t")
-              ivy-switch-buffer-other-window
-              (:columns
-               ((ivy-rich-buffer-icon)
-                (ivy-rich-candidate (:width 30))
-                (ivy-rich-switch-buffer-size (:width 7))
-                (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
-                (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
-                (ivy-rich-switch-buffer-project (:width 15 :face success))
-                (ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))
-               :predicate
-               (lambda (cand) (get-buffer cand))
-               :delimiter "\t")
-              counsel-switch-buffer
-              (:columns
-               ((ivy-rich-buffer-icon)
-                (ivy-rich-candidate (:width 30))
-                (ivy-rich-switch-buffer-size (:width 7))
-                (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
-                (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
-                (ivy-rich-switch-buffer-project (:width 15 :face success))
-                (ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))
-               :predicate
-               (lambda (cand) (get-buffer cand))
-               :delimiter "\t")
-              counsel-switch-buffer-other-window
-              (:columns
-               ((ivy-rich-buffer-icon)
-                (ivy-rich-candidate (:width 30))
-                (ivy-rich-switch-buffer-size (:width 7))
-                (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
-                (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
-                (ivy-rich-switch-buffer-project (:width 15 :face success))
-                (ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))
-               :predicate
-               (lambda (cand) (get-buffer cand))
-               :delimiter "\t")
-              persp-switch-to-buffer
-              (:columns
-               ((ivy-rich-buffer-icon)
-                (ivy-rich-candidate (:width 30))
-                (ivy-rich-switch-buffer-size (:width 7))
-                (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
-                (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
-                (ivy-rich-switch-buffer-project (:width 15 :face success))
-                (ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))
-               :predicate
-               (lambda (cand) (get-buffer cand))
-               :delimiter "\t")
-              counsel-M-x
-              (:columns
-               ((ivy-rich-function-icon)
-                (counsel-M-x-transformer (:width 50))
-                (ivy-rich-counsel-function-docstring (:face font-lock-doc-face))))
-              counsel-describe-function
-              (:columns
-               ((ivy-rich-function-icon)
-                (counsel-describe-function-transformer (:width 50))
-                (ivy-rich-counsel-function-docstring (:face font-lock-doc-face))))
-              counsel-describe-variable
-              (:columns
-               ((ivy-rich-variable-icon)
-                (counsel-describe-variable-transformer (:width 50))
-                (ivy-rich-counsel-variable-docstring (:face font-lock-doc-face))))
-              counsel-apropos
-              (:columns
-               ((ivy-rich-symbol-icon)
-                (ivy-rich-candidate))
-               :delimiter "\t")
-              counsel-info-lookup-symbol
-              (:columns
-               ((ivy-rich-symbol-icon)
-                (ivy-rich-candidate))
-               :delimiter "\t")
-              counsel-descbinds
-              (:columns
-               ((ivy-rich-keybinding-icon)
-                (ivy-rich-candidate))
-               :delimiter "\t")
-              counsel-find-file
-              (:columns
-               ((ivy-rich-file-icon)
-                (ivy-read-file-transformer))
-               :delimiter "\t")
-              counsel-file-jump
-              (:columns
-               ((ivy-rich-file-icon)
-                (ivy-rich-candidate))
-               :delimiter "\t")
-              counsel-dired
-              (:columns
-               ((ivy-rich-file-icon)
-                (ivy-read-file-transformer))
-               :delimiter "\t")
-              counsel-dired-jump
-              (:columns
-               ((ivy-rich-file-icon)
-                (ivy-rich-candidate))
-               :delimiter "\t")
-              counsel-fzf
-              (:columns
-               ((ivy-rich-file-icon)
-                (ivy-rich-candidate))
-               :delimiter "\t")
-              counsel-git
-              (:columns
-               ((ivy-rich-file-icon)
-                (ivy-rich-candidate))
-               :delimiter "\t")
-              counsel-recentf
-              (:columns
-               ((ivy-rich-file-icon)
-                (ivy-rich-candidate (:width 0.8))
-                (ivy-rich-file-last-modified-time (:face font-lock-comment-face)))
-               :delimiter "\t")
-              counsel-bookmark
-              (:columns
-               ((ivy-rich-bookmark-type)
-                (ivy-rich-bookmark-name (:width 40))
-                (ivy-rich-bookmark-info))
-               :delimiter "\t")
-              counsel-package
-              (:columns
-               ((ivy-rich-package-icon)
-                (ivy-rich-candidate))
-               :delimiter "\t")
-              counsel-find-library
-              (:columns
-               ((ivy-rich-library-icon)
-                (ivy-rich-candidate))
-               :delimiter "\t")
-              counsel-load-library
-              (:columns
-               ((ivy-rich-library-icon)
-                (ivy-rich-candidate))
-               :delimiter "\t")
-              counsel-load-theme
-              (:columns
-               ((ivy-rich-theme-icon)
-                (ivy-rich-candidate))
-               :delimiter "\t")
-              counsel-projectile-switch-project
-              (:columns
-               ((ivy-rich-file-icon)
-                (ivy-rich-candidate))
-               :delimiter "\t")
-              counsel-projectile-find-file
-              (:columns
-               ((ivy-rich-file-icon)
-                (counsel-projectile-find-file-transformer))
-               :delimiter "\t")
-              counsel-projectile-find-dir
-              (:columns
-               ((ivy-rich-dir-icon)
-                (counsel-projectile-find-dir-transformer))
-               :delimiter "\t")
-              treemacs-projectile
-              (:columns
-               ((ivy-rich-file-icon)
-                (ivy-rich-candidate))
-               :delimiter "\t"))))
+    (defun ivy-rich-dir-icon (_candidate)
+      "Display directory icons in `ivy-rich'."
+      (when (display-graphic-p)
+        (all-the-icons-octicon "file-directory" :height 1.0 :v-adjust 0.01)))
 
-    (use-package ivy-hydra
-      :ensure t)
-    (setq ivy-use-virtual-buffers t)
-    ;; swiper regular search
-    ;; rest fuzzy match
-    (setq ivy-re-builders-alist
-          '((swiper . ivy--regex-plus)
-            (t      . ivy--regex-fuzzy)))
-    (ivy-mode 1)
-    (bind-key "C-c C-r" 'ivy-resume)
-    (ivy-set-actions
-     'ivy-switch-buffer
-     '(("j" switch-to-buffer-other-frame "other frame")
-       ("k" kill-buffer "kill")
-       ("r" ivy--rename-buffer-action "rename"))))
+    (defun ivy-rich-function-icon (_candidate)
+      "Display function icons in `ivy-rich'."
+      (when (display-graphic-p)
+        (all-the-icons-faicon "cube" :height 0.9 :v-adjust -0.05 :face 'all-the-icons-purple)))
+
+    (defun ivy-rich-variable-icon (_candidate)
+      "Display variable icons in `ivy-rich'."
+      (when (display-graphic-p)
+        (all-the-icons-octicon "tag" :height 0.9 :v-adjust 0 :face 'all-the-icons-lblue)))
+
+    (defun ivy-rich-symbol-icon (_candidate)
+      "Display symbol icons in `ivy-rich'."
+      (when (display-graphic-p)
+        (all-the-icons-octicon "gear" :height 0.9 :v-adjust -0.05)))
+
+    (defun ivy-rich-theme-icon (_candidate)
+      "Display theme icons in `ivy-rich'."
+      (when (display-graphic-p)
+        (all-the-icons-material "palette" :height 1.0 :v-adjust -0.2 :face 'all-the-icons-lblue)))
+
+    (defun ivy-rich-keybinding-icon (_candidate)
+      "Display keybindings icons in `ivy-rich'."
+      (when (display-graphic-p)
+        (all-the-icons-material "keyboard" :height 1.0 :v-adjust -0.2)))
+
+    (defun ivy-rich-library-icon (_candidate)
+      "Display library icons in `ivy-rich'."
+      (when (display-graphic-p)
+        (all-the-icons-material "view_module" :height 1.0 :v-adjust -0.2 :face 'all-the-icons-lblue)))
+
+    (defun ivy-rich-package-icon (_candidate)
+      "Display package icons in `ivy-rich'."
+      (when (display-graphic-p)
+        (all-the-icons-faicon "archive" :height 0.9 :v-adjust 0.0 :face 'all-the-icons-silver)))
+
+    (when (display-graphic-p)
+      (defun my-ivy-rich-bookmark-type (candidate)
+        (let ((filename (file-local-name (ivy-rich-bookmark-filename candidate))))
+          (cond ((null filename)
+                 (all-the-icons-material "block" :v-adjust -0.2 :face 'warning))  ; fixed #38
+                ((file-remote-p filename)
+                 (all-the-icons-material "wifi_tethering" :v-adjust -0.2 :face 'mode-line-buffer-id))
+                ((not (file-exists-p filename))
+                 (all-the-icons-material "block" :v-adjust -0.2 :face 'error))
+                ((file-directory-p filename)
+                 (all-the-icons-octicon "file-directory" :height 0.9 :v-adjust -0.05))
+                (t (all-the-icons-icon-for-file (file-name-nondirectory filename) :height 0.9 :v-adjust -0.05)))))
+      (advice-add #'ivy-rich-bookmark-type :override #'my-ivy-rich-bookmark-type))
+    :hook ((ivy-mode . ivy-rich-mode)
+           (ivy-rich-mode . (lambda ()
+                              (setq ivy-virtual-abbreviate
+                                    (or (and ivy-rich-mode 'abbreviate) 'name)))))
+    :init
+    ;; For better performance
+    (setq ivy-rich-parse-remote-buffer nil)
+
+    ;; Setting tab size to 1, to insert tabs as delimiters
+    (add-hook 'minibuffer-setup-hook
+              (lambda ()
+                (setq tab-width 1)))
+
+    (setq ivy-rich-display-transformers-list
+          '(ivy-switch-buffer
+            (:columns
+             ((ivy-rich-buffer-icon)
+              (ivy-rich-candidate (:width 30))
+              (ivy-rich-switch-buffer-size (:width 7))
+              (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
+              (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
+              (ivy-rich-switch-buffer-project (:width 15 :face success))
+              (ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))
+             :predicate
+             (lambda (cand) (get-buffer cand))
+             :delimiter "\t")
+            ivy-switch-buffer-other-window
+            (:columns
+             ((ivy-rich-buffer-icon)
+              (ivy-rich-candidate (:width 30))
+              (ivy-rich-switch-buffer-size (:width 7))
+              (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
+              (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
+              (ivy-rich-switch-buffer-project (:width 15 :face success))
+              (ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))
+             :predicate
+             (lambda (cand) (get-buffer cand))
+             :delimiter "\t")
+            counsel-switch-buffer
+            (:columns
+             ((ivy-rich-buffer-icon)
+              (ivy-rich-candidate (:width 30))
+              (ivy-rich-switch-buffer-size (:width 7))
+              (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
+              (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
+              (ivy-rich-switch-buffer-project (:width 15 :face success))
+              (ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))
+             :predicate
+             (lambda (cand) (get-buffer cand))
+             :delimiter "\t")
+            counsel-switch-buffer-other-window
+            (:columns
+             ((ivy-rich-buffer-icon)
+              (ivy-rich-candidate (:width 30))
+              (ivy-rich-switch-buffer-size (:width 7))
+              (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
+              (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
+              (ivy-rich-switch-buffer-project (:width 15 :face success))
+              (ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))
+             :predicate
+             (lambda (cand) (get-buffer cand))
+             :delimiter "\t")
+            persp-switch-to-buffer
+            (:columns
+             ((ivy-rich-buffer-icon)
+              (ivy-rich-candidate (:width 30))
+              (ivy-rich-switch-buffer-size (:width 7))
+              (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
+              (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
+              (ivy-rich-switch-buffer-project (:width 15 :face success))
+              (ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))
+             :predicate
+             (lambda (cand) (get-buffer cand))
+             :delimiter "\t")
+            counsel-M-x
+            (:columns
+             ((ivy-rich-function-icon)
+              (counsel-M-x-transformer (:width 50))
+              (ivy-rich-counsel-function-docstring (:face font-lock-doc-face))))
+            counsel-describe-function
+            (:columns
+             ((ivy-rich-function-icon)
+              (counsel-describe-function-transformer (:width 50))
+              (ivy-rich-counsel-function-docstring (:face font-lock-doc-face))))
+            counsel-describe-variable
+            (:columns
+             ((ivy-rich-variable-icon)
+              (counsel-describe-variable-transformer (:width 50))
+              (ivy-rich-counsel-variable-docstring (:face font-lock-doc-face))))
+            counsel-apropos
+            (:columns
+             ((ivy-rich-symbol-icon)
+              (ivy-rich-candidate))
+             :delimiter "\t")
+            counsel-info-lookup-symbol
+            (:columns
+             ((ivy-rich-symbol-icon)
+              (ivy-rich-candidate))
+             :delimiter "\t")
+            counsel-descbinds
+            (:columns
+             ((ivy-rich-keybinding-icon)
+              (ivy-rich-candidate))
+             :delimiter "\t")
+            counsel-find-file
+            (:columns
+             ((ivy-rich-file-icon)
+              (ivy-read-file-transformer))
+             :delimiter "\t")
+            counsel-file-jump
+            (:columns
+             ((ivy-rich-file-icon)
+              (ivy-rich-candidate))
+             :delimiter "\t")
+            counsel-dired
+            (:columns
+             ((ivy-rich-file-icon)
+              (ivy-read-file-transformer))
+             :delimiter "\t")
+            counsel-dired-jump
+            (:columns
+             ((ivy-rich-file-icon)
+              (ivy-rich-candidate))
+             :delimiter "\t")
+            counsel-fzf
+            (:columns
+             ((ivy-rich-file-icon)
+              (ivy-rich-candidate))
+             :delimiter "\t")
+            counsel-git
+            (:columns
+             ((ivy-rich-file-icon)
+              (ivy-rich-candidate))
+             :delimiter "\t")
+            counsel-recentf
+            (:columns
+             ((ivy-rich-file-icon)
+              (ivy-rich-candidate (:width 0.8))
+              (ivy-rich-file-last-modified-time (:face font-lock-comment-face)))
+             :delimiter "\t")
+            counsel-bookmark
+            (:columns
+             ((ivy-rich-bookmark-type)
+              (ivy-rich-bookmark-name (:width 40))
+              (ivy-rich-bookmark-info))
+             :delimiter "\t")
+            counsel-package
+            (:columns
+             ((ivy-rich-package-icon)
+              (ivy-rich-candidate))
+             :delimiter "\t")
+            counsel-find-library
+            (:columns
+             ((ivy-rich-library-icon)
+              (ivy-rich-candidate))
+             :delimiter "\t")
+            counsel-load-library
+            (:columns
+             ((ivy-rich-library-icon)
+              (ivy-rich-candidate))
+             :delimiter "\t")
+            counsel-load-theme
+            (:columns
+             ((ivy-rich-theme-icon)
+              (ivy-rich-candidate))
+             :delimiter "\t")
+            counsel-projectile-switch-project
+            (:columns
+             ((ivy-rich-file-icon)
+              (ivy-rich-candidate))
+             :delimiter "\t")
+            counsel-projectile-find-file
+            (:columns
+             ((ivy-rich-file-icon)
+              (counsel-projectile-find-file-transformer))
+             :delimiter "\t")
+            counsel-projectile-find-dir
+            (:columns
+             ((ivy-rich-dir-icon)
+              (counsel-projectile-find-dir-transformer))
+             :delimiter "\t")
+            treemacs-projectile
+            (:columns
+             ((ivy-rich-file-icon)
+              (ivy-rich-candidate))
+             :delimiter "\t"))))
+
+  (use-package ivy-hydra
+    :ensure t)
+  (setq ivy-use-virtual-buffers t)
+  ;; swiper regular search
+  ;; rest fuzzy match
+  (setq ivy-re-builders-alist
+        '((swiper . ivy--regex-plus)
+          (t      . ivy--regex-fuzzy)))
+  (ivy-mode 1)
+  (bind-key "C-c C-r" 'ivy-resume)
+  (ivy-set-actions
+   'ivy-switch-buffer
+   '(("j" switch-to-buffer-other-frame "other frame")
+     ("k" kill-buffer "kill")
+     ("r" ivy--rename-buffer-action "rename"))))
 
 (use-package avy
   :ensure t
@@ -994,18 +880,6 @@ Version 2018-01-13"
 (use-package smex
   :ensure t)
 
-(use-package powershell
-  :if (string-equal system-type "windows-nt")
-  :ensure t)
-
-(use-package clojure-mode
-  :disabled
-  :ensure t)
-
-(use-package cider
-  :disabled
-  :ensure t)
-
 (use-package searcheverything
   :if avax-everything-cli-install-dir
   :ensure t
@@ -1032,29 +906,6 @@ Version 2018-01-13"
   :ensure nil
   :hook ((prog-mode . subword-mode)
          (minibuffer-setup . subword-mode)))
-
-;; Colorize color names in buffers
-(use-package rainbow-mode
-  :disabled ;; Big perf hit on opening files need to disable it by default
-  :ensure t
-  :diminish
-  :hook ((emacs-lisp-mode web-mode css-mode) . rainbow-mode))
-
-;; Highlight brackets according to their depth
-(use-package rainbow-delimiters
-  :disabled ;; Big perf hit on opening files need to disable it by default
-  :diminish
-  :ensure t
-  :hook ((emacs-lisp-mode web-mode css-mode) . rainbow-delimiters-mode))
-
-(use-package yasnippet
-  :ensure t
-  :diminish yas-minor-mode
-  :hook (after-init . yas-global-mode)
-  :config
-  (use-package yasnippet-snippets
-    :ensure t)
-  (setq yas-snippet-dirs (append '("~/.emacs.d/mysnippets") yas-snippet-dirs)))
 
 (if (not avax-use-evil)
     (use-package god-mode
@@ -1113,33 +964,11 @@ Version 2018-01-13"
       t))
   (server-start))
 
-(use-package moe-light-theme
-  :ensure t
-  :disabled
-  :config
-  (load-theme 'moe-ligaht t))
-
-(use-package monokai-theme
-  :ensure t
-  :disabled
-  :config
-  (load-theme 'monokai t))
-
-(use-package github-modern-theme
-  :ensure t
-  :disabled
-  :config
-  (load-theme 'github-modern t))
-
 (use-package wttrin
   :ensure t
   :config
   (setq wttrin-default-cities '("Belgrade"))
   (setq wttrin-default-accept-language '("Accept-Language" . "en-GB")))
-
-(use-package which-function-mode
-  :ensure nil
-  :hook (prog-mode . which-function-mode))
 
 (use-package expand-region
   :ensure t
@@ -1175,10 +1004,6 @@ Version 2018-01-13"
   :ensure t
   :hook ((prog-mode . aggressive-indent-mode)))
 
-(use-package scratch
-  :ensure t
-  :bind (("C-[ C-s" . scratch)))
-
 (use-package move-text
   :ensure t
   :config
@@ -1192,56 +1017,6 @@ Version 2018-01-13"
   :ensure t
   :config
   (wrap-region-global-mode))
-
-(use-package doom-themes
-  :ensure t
-  :config
-  (load-theme 'doom-one t))
-
-(use-package magit
-  :ensure t)
-
-(use-package solaire-mode
-  :ensure t
-  :init
-  :config
-  ;; fringe can become unstyled when deleting or focusing frames
-  (add-hook 'focus-in-hook #'solaire-mode-reset)
-  ;; Prevent color glitches when reloading either DOOM or loading a new theme
-  ;; org-capture takes an org buffer and narrows it. The result is erroneously
-  ;; considered an unreal buffer, so solaire-mode must be restored.
-  (add-hook 'org-capture-mode-hook #'turn-on-solaire-mode)
-
-  ;; On Emacs 26+, when point is on the last line and solaire-mode is remapping
-  ;; the hl-line face, hl-line's highlight bleeds into the rest of the window
-  ;; after eob. On Emacs 27 this no longer happens.
-(defun +doom--line-range-fn ()
-      (cons (line-beginning-position)
-            (cond ((let ((eol (line-end-position)))
-                     (and (=  eol (point-max))
-                          (/= eol (line-beginning-position))))
-                   (1- (line-end-position)))
-                  ((or (eobp)
-                       (= (line-end-position 2) (point-max)))
-                   (line-end-position))
-                  ((line-beginning-position 2)))))
-
-  (setq hl-line-range-function #'+doom--line-range-fn)
-
-  ;; Because fringes can't be given a buffer-local face, they can look odd, so
-  ;; we remove them in the minibuffer and which-key popups (they serve no
-  ;; purpose there anyway).
-  (add-hook 'solaire-mode-hook
-    (defun +doom-disable-fringes-in-minibuffer-h (&rest _)
-      (set-window-fringes (minibuffer-window) 0 0 nil)))
-
-  (add-hook 'minibuffer-setup-hook
-            #'+doom-disable-fringes-in-minibuffer-h )
-  (add-hook 'window-configuration-change-hook
-          #'+doom-disable-fringes-in-minibuffer-h )
-
-
-  (solaire-global-mode +1))
 
 ;; END
 ;; PACKAGES REGION
