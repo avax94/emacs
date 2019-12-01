@@ -1202,6 +1202,7 @@ Version 2018-01-13"
   :ensure t)
 
 (use-package solaire-mode
+  :ensure t
   :init
   :config
   ;; fringe can become unstyled when deleting or focusing frames
