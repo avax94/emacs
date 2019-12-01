@@ -1,19 +1,24 @@
 ;;; -*- lexical-binding: t; no-byte-compile: t; -*-
 
 (defcustom avax-machine-type
-  :options '(house-win work-win house-linux))
+  :options '(house-win
+             work-win
+             house-linux
+             house-laptop))
 
-(setq avax-machine-type 'house-win)
+(setq avax-machine-type 'house-laptop)
 
 ;; Windows notifications program
 (defvar avax-toast-notifier-path
   (cond ((eq avax-machine-type 'house-win) nil)
+        ((eq avax-machine-type'house-laptop) nil)
         ((eq avax-machine-type'house-linux) nil)
         ((eq avax-machine-type 'work-win) "E:/workspace/git/toaster/toast/bin/Release/toast.exe"))
   "Location of toast application. For more referr to https://github.com/WindowsNotifications/desktop-toasts")
 
 (defvar avax-ggtags-exec-path
   (cond ((eq avax-machine-type 'house-win) nil)
+        ((eq avax-machine-type'house-laptop) nil)
         ((eq avax-machine-type'house-linux) nil)
         ((eq avax-machine-type 'work-win) "C:/Ggtags/bin"))
   "Install path of gtags. GNU Global - refer to https://www.gnu.org/software/global/")
@@ -23,18 +28,21 @@
 
 (defvar avax-tf-exe
   (cond ((eq avax-machine-type 'house-win) "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/CommonExtensions/Microsoft/TeamFoundation/Team Explorer/TF.exe")
+        ((eq avax-machine-type'house-laptop) "C:/Program Files (x86)/Microsoft Visual Studio/2017/Professional/Common7/IDE/CommonExtensions/Microsoft/TeamFoundation/Team Explorer/TF.exe")
         ((eq avax-machine-type'house-linux) nil)
         ((eq avax-machine-type 'work-win) "C:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/Common7/IDE/CommonExtensions/Microsoft/TeamFoundation/Team Explorer/TF.exe"))
   "Path to tfs cli tool. Only applicable to Windows operating systems")
 
 (defvar avax-python-exec-path
   (cond ((eq avax-machine-type 'house-win) "C:/Users/Milan/AppData/Local/Programs/Python/Python37/")
+        ((eq avax-machine-type 'house-laptop) "C:/Users/stefa/AppData/Local/Programs/Python/Python37/")
         ((eq avax-machine-type'house-linux) nil)
         ((eq avax-machine-type 'work-win) "C:/Users/v-milast/AppData/Local/Programs/Python/Python37/"))
   "Folder where python is installed")
 
 (defvar avax-everything-cli-install-dir
   (cond ((eq avax-machine-type 'house-win) nil)
+        ((eq avax-machine-type 'house-win) nil)
         ((eq avax-machine-type'house-linux) nil)
         ((eq avax-machine-type 'work-win) "E:/ES-1.1.0.10/"))
   "Directory path of SearchEverything CLI tool. Refer to https://www.voidtools.com/downloads/.")
@@ -42,6 +50,7 @@
 (defvar avax-keyfreq-file-path
   (cond ((eq avax-machine-type 'house-win) "C:/Users/Milan/AppData/Roaming/.emacs.d/.emacs.keyfreq")
         ((eq avax-machine-type'house-linux) "~/.emacs.d/.emacs.keyfreq")
+        ((eq avax-machine-type'house-laptop) "~/.emacs.d/.emacs.keyfreq")
         ((eq avax-machine-type 'work-win) "D:/.emacs.d/.emacs.keyfreq"))
   "Where we should store information for keyfreq emacs package. About package (https://github.com/dacap/keyfreq)")
 
@@ -52,6 +61,7 @@
 
 (defvar avax-org-mode-directory
   (cond ((eq avax-machine-type 'house-win) "E:/org-mode")
+        ((eq avax-machine-type'house-laptop) "C:/org-mode")
         ((eq avax-machine-type'house-linux) "~/org-mode")
         ((eq avax-machine-type 'work-win) "E:/org-mode"))
   "Directory path where we store all .org files")
@@ -60,6 +70,7 @@
 
 (defvar avax-git-dir
   (cond ((eq avax-machine-type 'house-win) "C:/Program Files/Git/bin")
+        ((eq avax-machine-type 'house-laptop) "C:/Program Files/Git/bin")
         ((eq avax-machine-type'house-linux) nil)
         ((eq avax-machine-type 'work-win) "C:/Program Files/Git/bin"))
   "Directory where git is installed.")
@@ -67,40 +78,51 @@
 (defvar avax-ag-dir
   (cond ((eq avax-machine-type 'house-win) nil)
         ((eq avax-machine-type'house-linux) nil)
+        ((eq avax-machine-type'house-laptop) nil)
         ((eq avax-machine-type 'work-win) "D:/ag"))
   "Directory where silver search is installed. Refer to https://github.com/ggreer/the_silver_searcher")
 
 (defvar avax-pt-dir
   (cond ((eq avax-machine-type 'house-win) nil)
+        ((eq avax-machine-type'house-laptop) nil)
         ((eq avax-machine-type'house-linux) nil)
         ((eq avax-machine-type 'work-win) "D:/pt"))
   "Directory where platinum search is installed. Refer to https://github.com/monochromegane/the_platinum_searcher")
 
 (defvar avax-cygwin-dir
   (cond ((eq avax-machine-type 'house-win) "c:/cygwin64")
+        ((eq avax-machine-type 'house-laptop) "c:/cygwin64")
         ((eq avax-machine-type'house-linux) nil)
         ((eq avax-machine-type 'work-win) "E:/bin/cygwin64"))
   "Cygwin installation dir")
 
 (defvar avax-emacs-installation-dir
   (cond ((eq avax-machine-type 'house-win) "G:/emacs/bin")
+        ((eq avax-machine-type 'house-laptop) "C:/emacs/bin")
         ((eq avax-machine-type'house-linux) nil)
         ((eq avax-machine-type 'work-win) "d:/emacs26.1686/bin"))
   "Directory where emacs is installed")
 
 (defvar avax-golang-dir
   (cond ((eq avax-machine-type 'house-win) nil)
+        ((eq avax-machine-type 'house-laptop) nil)
         ((eq avax-machine-type'house-linux) nil)
         ((eq avax-machine-type 'work-win) "C:/Users/v-milast/go/bin"))
   "GoLang installation dir. Refer to https://golang.org/")
 
 (defvar avax-java-dir
   (cond ((eq avax-machine-type 'house-win) "c:/Program Files/Java/jdk1.8.0_121/bin")
+        ((eq avax-machine-type 'house-laptop) "C:/Program Files (x86)/Java/jre1.8.0_211/bin/java.exe")
         ((eq avax-machine-type'house-linux) nil)
-        ((eq avax-machine-type 'work-win) "C:/Program Files/Java/jdk1.8.0_172/bin")))
+        ((eq avax-machine-type 'work-win) "C:/Program Files/Java/jdk1.8.0_172/bin"))
+  "Java installation directory")
 
 (defvar avax-bin-dir
-  "D:/usr/bin")
+    (cond ((eq avax-machine-type 'house-win) nil)
+        ((eq avax-machine-type 'house-laptop) nil)
+        ((eq avax-machine-type'house-linux) nil)
+        ((eq avax-machine-type 'work-win) "D:/usr/bin"))
+    "Random binaries path")
 
 (when (string-equal system-type "windows-nt")
   (setenv "PATH"
@@ -138,6 +160,7 @@
 (defvar omnisharp-exe-path
   (cond ((eq avax-machine-type 'house-win) nil)
         ((eq avax-machine-type'house-linux) nil)
+        ((eq avax-machine-type'house-laptop) nil)
         ((eq avax-machine-type 'work-win) "c:\\omnisharp\\OmniSharp.exe")))
 
 ;; Font size
@@ -146,9 +169,9 @@
 (setenv "USER"
         (cond ((eq avax-machine-type 'house-win) "C:/Users/Milan/")
               ((eq avax-machine-type'house-linux) nil)
+              ((eq avax-machine-type'house-laptop) "C:/Users/stefa/")
               ((eq avax-machine-type 'work-win) "c:/Users/v-milast/")))
 ;; END
-
 
 (setq diff-switches "-u -b -E -Z -w -B")
 
