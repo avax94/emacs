@@ -15,7 +15,7 @@
   :config
   (unbind-key "M-<" ggtags-navigation-map)
   (unbind-key "M->" ggtags-navigation-map)
-  (setq ggtags-executable-directory ggtags-exec-path)
+  (setq ggtags-executable-directory avax-ggtags-exec-path)
   (add-hook 'c-mode-common-hook
             (lambda ()
               (when (derived-mode-p 'csharp-mode 'c-mode 'c++-mode 'java-mode)

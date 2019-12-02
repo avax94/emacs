@@ -309,7 +309,7 @@ Version 2018-01-13"
     (require 'org-ql-search)
     (defun org-ql-programming (query)
       (interactive "s")
-      (org-ql-search avax-org-mode-directory query)))
+      (org-ql-search avax-org-programming-file query)))
 
   (use-package org-bullets
     :ensure t
@@ -920,6 +920,7 @@ Version 2018-01-13"
       (add-hook 'god-mode-enabled-hook 'my-update-cursor)
       (add-hook 'god-mode-disabled-hook 'my-update-cursor)
       (add-to-list 'god-exempt-major-modes 'dired-mode)
+      (add-to-list 'god-exempt-major-modes 'magit-status-mode)
       (add-to-list 'god-exempt-major-modes 'org-agenda-mode)
       (god-mode-all)
       (defun god-mode-switch-buffer ()
