@@ -323,6 +323,7 @@ Version 2018-01-13"
   (setq avax-org-inbox-file (concat org-directory "/inbox.org"))
   (setq avax-org-someday-file (concat org-directory "/someday.org"))
   (setq avax-org-journal-file (concat org-directory "/journal.org"))
+  (setq avax-org-archive-file (concat org-directory "/archive.org"))
   (setq org-agenda-files (list avax-org-projects-file
                                avax-org-inbox-file
                                avax-org-journal-file))
@@ -380,7 +381,7 @@ Version 2018-01-13"
           ))
   (advice-add 'org-agenda :around #'org-agenda-advice)
   (setq org-startup-truncated nil)
-  (setq org-archive-location (concat org-archive-file "::* From %s"))
+  (setq org-archive-location (concat avax-org-archive-file "::* From %s"))
   :bind
   (("C-c c" . org-capture)
    ("C-c o a" . org-agenda-list)

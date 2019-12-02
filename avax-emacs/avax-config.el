@@ -141,7 +141,7 @@
            (when avax-emacs-installation-dir
              (concat avax-emacs-installation-dir ";"))
            (when avax-golang-dir
-             (concant avax-golang-dir ";"))
+             (concat avax-golang-dir ";"))
            (when avax-java-dir
              (concat avax-java-dir ";"))
            (when avax-everything-cli-install-dir
