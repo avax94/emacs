@@ -70,7 +70,7 @@
   (cond ((eq avax-machine-type 'house-win) "C:/Program Files/Git/bin")
         ((eq avax-machine-type 'house-laptop) "C:/Program Files/Git/bin")
         ((eq avax-machine-type'house-linux) nil)
-        ((eq avax-machine-type 'work-win) "C:/Program Files/Git/bin"))
+        ((eq avax-machine-type 'work-win) "C:\\Program Files\\Git\\mingw64\\bin"))
   "Directory where git is installed.")
 
 (defvar avax-ag-dir

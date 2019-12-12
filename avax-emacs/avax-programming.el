@@ -145,6 +145,17 @@
   :bind (("C-[ C-s" . scratch)))
 
 (use-package magit
-  :ensure t)
+  :ensure t
+  :config
+  (setq  magit-status-sections-hook
+         '(magit-insert-status-headers
+           magit-insert-merge-log
+           magit-insert-rebase-sequence
+           magit-insert-untracked-files
+           magit-insert-unstaged-changes
+           magit-insert-staged-changes
+           magit-insert-stashes
+           magit-insert-unpushed-to-pushremote
+           magit-insert-unpulled-from-pushremote)))
 
 (provide 'avax-programming)
